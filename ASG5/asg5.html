@@ -98,17 +98,18 @@
                 const radiusTop = 1;
                 const radiusBottom = 1;
                 const height = 1;
-                const radialSegments = 2;
+                const radialSegments = 8;
                 const heightSegments = 1;
                 const openEnded = false;
                 const thetaStart = 0;
                 const thetaLength = (2 * Math.PI);
 
                 const geometry2 = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
-                const material2 = new THREE.MeshBasicMaterial( { color: 0xD197EA } );
+                const material2 = new THREE.MeshPhongMaterial( { color: 0xD197EA } );
                 const cylinder = new THREE.Mesh(geometry2, material2);
                 scene.add(cylinder);
                 cylinder.position.x = -1.5;
+                cylinder.position.y = -1;
         }
 
 
@@ -118,13 +119,14 @@
                 const detail = 1;
 
                 const geometry3 = new THREE.OctahedronGeometry(radius, detail);
-                const material3 = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+                const material3 = new THREE.MeshPhongMaterial( {color: 0xffffff} );
                 const octahedron = new THREE.Mesh(geometry3, material3);
                 scene.add(octahedron);
-                octahedron.position.x = 1;
+                octahedron.position.set(2.25, 0, -1);
                 requestAnimationFrame(render);
 
-                function animateOctahedron() {
+                function animateOctahedron() { // !
+                    requestAnimationFrame(render);
                     octahedron.rotation.x += 0.01;
                     octahedron.rotation.y += 0.01;
                     renderer.render(scene, camera);
