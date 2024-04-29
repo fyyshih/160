@@ -36,82 +36,106 @@
 
             const scene = new THREE.Scene();
 
+            // ----------- draw cube -----------
             // creating a BoxGeometry (contains data for a box)
-            const boxWidth = 1;
-            const boxHeight = 1;
-            const boxDepth = 1;
-            const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-            const cubes = [];
+                const boxWidth = 1;
+                const boxHeight = 1;
+                const boxDepth = 1;
+                const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+                const cubes = [];
 
             // ADDING TEXTURES
-            const loader = new THREE.TextureLoader();
-            const materials = [
-                new THREE.MeshBasicMaterial({ map: loadColorTexture('https://fastly.picsum.photos/id/16/2500/1667.jpg?hmac=uAkZwYc5phCRNFTrV_prJ_0rP0EdwJaZ4ctje2bY7aE')}),
-                new THREE.MeshBasicMaterial({ map: loadColorTexture('https://fastly.picsum.photos/id/13/2500/1667.jpg?hmac=SoX9UoHhN8HyklRA4A3vcCWJMVtiBXUg0W4ljWTor7s')}),
-                new THREE.MeshBasicMaterial({ map: loadColorTexture('https://fastly.picsum.photos/id/17/2500/1667.jpg?hmac=HD-JrnNUZjFiP2UZQvWcKrgLoC_pc_ouUSWv8kHsJJY')}),
-                new THREE.MeshBasicMaterial({ map: loadColorTexture('https://fastly.picsum.photos/id/18/2500/1667.jpg?hmac=JR0Z_jRs9rssQHZJ4b7xKF82kOj8-4Ackq75D_9Wmz8')}),
-                new THREE.MeshBasicMaterial({ map: loadColorTexture('https://fastly.picsum.photos/id/47/4272/2848.jpg?hmac=G8dXSLa-ngBieraQt5EORu-4r6tveX3fhvBTZM0Y8xM')}),
-                new THREE.MeshBasicMaterial({ map: loadColorTexture('https://fastly.picsum.photos/id/74/4288/2848.jpg?hmac=q02MzzHG23nkhJYRXR-_RgKTr6fpfwRgcXgE0EKvNB8')})
-            ]
+                const loader = new THREE.TextureLoader();
+                const materials = [
+                    new THREE.MeshBasicMaterial({ map: loadColorTexture('https://fastly.picsum.photos/id/16/2500/1667.jpg?hmac=uAkZwYc5phCRNFTrV_prJ_0rP0EdwJaZ4ctje2bY7aE')}),
+                    new THREE.MeshBasicMaterial({ map: loadColorTexture('https://fastly.picsum.photos/id/13/2500/1667.jpg?hmac=SoX9UoHhN8HyklRA4A3vcCWJMVtiBXUg0W4ljWTor7s')}),
+                    new THREE.MeshBasicMaterial({ map: loadColorTexture('https://fastly.picsum.photos/id/17/2500/1667.jpg?hmac=HD-JrnNUZjFiP2UZQvWcKrgLoC_pc_ouUSWv8kHsJJY')}),
+                    new THREE.MeshBasicMaterial({ map: loadColorTexture('https://fastly.picsum.photos/id/18/2500/1667.jpg?hmac=JR0Z_jRs9rssQHZJ4b7xKF82kOj8-4Ackq75D_9Wmz8')}),
+                    new THREE.MeshBasicMaterial({ map: loadColorTexture('https://fastly.picsum.photos/id/47/4272/2848.jpg?hmac=G8dXSLa-ngBieraQt5EORu-4r6tveX3fhvBTZM0Y8xM')}),
+                    new THREE.MeshBasicMaterial({ map: loadColorTexture('https://fastly.picsum.photos/id/74/4288/2848.jpg?hmac=q02MzzHG23nkhJYRXR-_RgKTr6fpfwRgcXgE0EKvNB8')})
+                ]
+                
+
             // create a Mesh, which reps Geometry (shape of obj), Material, position/orientation/scale of obj relative to parent (the scene)
-            const cube = new THREE.Mesh(geometry, materials);
-            scene.add(cube); // adds non-rotating cube
-            cubes.push(cube);
-            // render the scene by calling renderer's render fn + passing in scene and camera
-            // renderer.render(scene, camera); --> call in render()
-            renderer.setSize(500, 250, false);
+                const cube = new THREE.Mesh(geometry, materials);
+                scene.add(cube); // adds non-rotating cube
+                cubes.push(cube);
+                // render the scene by calling renderer's render fn + passing in scene and camera
+                // renderer.render(scene, camera); --> call in render()
+                renderer.setSize(500, 250, false);
             // for texture mapping to each face of the cube:
-            function loadColorTexture(path) {
-                const texture = loader.load(path);
-                texture.colorSpace = THREE.SRGBColorSpace;
-                return texture;
-            }
+                function loadColorTexture(path) {
+                    const texture = loader.load(path);
+                    texture.colorSpace = THREE.SRGBColorSpace;
+                    return texture;
+                }
 
             // create directional light (has position + target, default (0,0,0))
-            const color = 0xFFFFFF;
-            const intensity = 3;
-            const light = new THREE.DirectionalLight(color, intensity);
-            light.position.set(-1, 2, 4); // light set slightly left, above, and behind camera
-            scene.add(light); // target still default(0,0,0), so shines towards origin
+                const color = 0xFFFFFF;
+                const intensity = 3;
+                const light = new THREE.DirectionalLight(color, intensity);
+                light.position.set(-1, 2, 4); // light set slightly left, above, and behind camera
+                scene.add(light); // target still default(0,0,0), so shines towards origin
 
             // RENDERING FUNCTION
-            function render(time) {
-                time *= 0.001; // converts time --> seconds
+                function render(time) {
+                    time *= 0.001; // converts time --> seconds
 
-                cubes.forEach((cube, ndx) => {
-                    const speed = .2 + ndx * .1;
-                    const rot = time*speed;
-                    cube.rotation.x = rot;
-                    cube.rotation.y = rot;
-                });
+                    cubes.forEach((cube, ndx) => {
+                        const speed = .2 + ndx * .1;
+                        const rot = time*speed;
+                        cube.rotation.x = rot;
+                        cube.rotation.y = rot;
+                    });
 
-                renderer.render(scene, camera);
-                requestAnimationFrame(render); // request to browser that you want to animate something
-                // browser calls this fn, will re-render pg if anything updates here
-            }
+                    renderer.render(scene, camera);
+                    requestAnimationFrame(render); // request to browser that you want to animate something
+                    // browser calls this fn, will re-render pg if anything updates here
+                }
 
-            requestAnimationFrame(render);
+            // ---------- ADDING CYLINDER -----------
+            function drawCylinder() {
+                const radiusTop = 1;
+                const radiusBottom = 1;
+                const height = 1;
+                const radialSegments = 8;
+                const heightSegments = 1;
+                const openEnded = false;
+                const thetaStart = 0;
+                const thetaLength = (2 * Math.PI);
 
-            // adding 2 more cubes
-            function makeInstance(geometry, texture, x) {
-                const material = new THREE.MeshPhongMaterial({map: texture});
-
-                const cube = new THREE.Mesh(geometry, material);
-                scene.add(cube);
-
-                cube.position.x = x;
-                
-                return cube;
-            }
-
-            const geometry2 = new THREE.CylinderGeometry(100, 5, 30, 22);
-            const material2 = new THREE.MeshBasicMaterial( { color: 0x44aa88 } );
-            const cylinder = new THREE.Mesh( geometry2, material2 );
-            scene.add(cylinder);
-            cylinder.position.x = 2;
-            requestAnimationFrame(render);
+                const geometry2 = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
+                const material2 = new THREE.MeshPhongMaterial( { color: 0xD197EA } );
+                const cylinder = new THREE.Mesh(geometry2, material2);
+                scene.add(cylinder);
+                cylinder.position.x = -1.5;
+                cylinder.position.y = -1;
+        }
 
 
+            // ---------- draw octahedron -----------
+            function drawOctahedron() {
+                const radius = 1;
+                const detail = 1;
+
+                const geometry3 = new THREE.OctahedronGeometry(radius, detail);
+                const material3 = new THREE.MeshPhongMaterial( {color: 0xffffff} );
+                const octahedron = new THREE.Mesh(geometry3, material3);
+                scene.add(octahedron);
+                octahedron.position.set(2.25, 0, -1);
+                requestAnimationFrame(render);
+
+                function animateOctahedron() { // !
+                    requestAnimationFrame(render);
+                    octahedron.rotation.x += 0.01;
+                    octahedron.rotation.y += 0.01;
+                    renderer.render(scene, camera);
+                }
+                animateOctahedron();
+            }   
+            // drawCube();
+            drawCylinder();
+            drawOctahedron();  
 
             {
                 const objLoader = new OBJLoader();
