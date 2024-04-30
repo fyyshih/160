@@ -70,12 +70,12 @@
                     return texture;
                 }
 
-            // create directional light (has position + target, default (0,0,0))
-                const color = 0xFFFFFF;
-                const intensity = 3;
-                const light = new THREE.DirectionalLight(color, intensity);
-                light.position.set(-1, 2, 4); // light set slightly left, above, and behind camera
-                scene.add(light); // target still default(0,0,0), so shines towards origin
+            // // create directional light (has position + target, default (0,0,0))
+            //     const color = 0xFFFFFF;
+            //     const intensity = 3;
+            //     const light = new THREE.DirectionalLight(color, intensity);
+            //     light.position.set(-1, 2, 4); // light set slightly left, above, and behind camera
+            //     scene.add(light); // target still default(0,0,0), so shines towards origin
 
             // RENDERING FUNCTION
                 function render(time) {
@@ -110,40 +110,61 @@
                 scene.add(cylinder);
                 cylinder.position.x = -1.5;
                 cylinder.position.y = -1;
+
+                function animateCylinder() {
+                    requestAnimationFrame(animateCylinder);
+                    cylinder.rotation.x += 0.01;
+                    cylinder.rotation.y += 0.01;
+                    renderer.render(scene, camera);
+                }
+                animateCylinder();
         }
 
 
             // ---------- draw octahedron -----------
             function drawOctahedron() {
-                // create directional light (has position + target, default (0,0,0))
-                const color = 0xFFFFFF;
-                const intensity = 3;
-                const light = new THREE.DirectionalLight(color, intensity);
-                light.position.set(2.25, 0, 4); // light set slightly left, above, and behind camera
-                scene.add(light); // target still default(0,0,0), so shines towards origin
-                
                 const radius = 1;
                 const detail = 1;
 
+
+                const loader = new THREE.TextureLoader();
                 const geometry3 = new THREE.OctahedronGeometry(radius, detail);
                 const material3 = new THREE.MeshPhongMaterial( {color: 0xffffff} );
                 const octahedron = new THREE.Mesh(geometry3, material3);
                 scene.add(octahedron);
+
                 octahedron.position.set(2.25, 0, -1);
                 requestAnimationFrame(render);
 
-                function animateOctahedron() { // !
-                    requestAnimationFrame(render);
+                function animateOctahedron() {
+                    requestAnimationFrame(animateOctahedron);
                     octahedron.rotation.x += 0.01;
                     octahedron.rotation.y += 0.01;
                     renderer.render(scene, camera);
                 }
+
                 animateOctahedron();
 
             }   
+            
+            function renderLights() {
+                let color = 0xFA6E52;
+                let intensity = 1;
+                let light = new THREE.DirectionalLight(color, intensity);
+                light.position.set(10, 10, 10);
+                scene.add(light); 
+
+                color = 0x0700E4;
+                intensity = 2;
+                light = new THREE.DirectionalLight(color, intensity);
+                light.position.set(-10, -10, -10);
+                scene.add(light);
+            }
+
             // drawCube();
             drawCylinder();
             drawOctahedron();  
+            renderLights();
 
             {
                 const objLoader = new OBJLoader();
@@ -155,7 +176,8 @@
 
         main();
     </script>
-
+<p>The three shapes I have are a cylinder (left), cube (middle), and octahedron (right).</p>
 </body>
+
 </html>
 
