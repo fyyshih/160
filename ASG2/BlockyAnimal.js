@@ -266,8 +266,8 @@ function renderScene() {
 
     // draw upper beak
     var upperBeak = new Cube();
-    upperBeak.color = [0.5, 0.8, 0.5, 1];
-    upperBeak.matrix.translate(-.8, .2, -.12);
+    upperBeak.color = [0.5, 0.2, 0.5, 1];
+    upperBeak.matrix.translate(-.73, .25, -.17);
     upperBeak.matrix.rotate(30, 0, 0, 1);
     upperBeak.matrix.scale(.5, .05, .1);
     upperBeak.render();
@@ -275,7 +275,7 @@ function renderScene() {
     // draw lower beak
     var lowerBeak = new Cube();
     lowerBeak.color = [0.5, 0.5, 0.8, 1];
-    lowerBeak.matrix.translate(-.7, .2, -.12);
+    lowerBeak.matrix.translate(-.7, .2, -.17);
     lowerBeak.matrix.rotate(30, 0, 0, 1);
     lowerBeak.matrix.scale(.5, .05, .1);
     lowerBeak.render();
