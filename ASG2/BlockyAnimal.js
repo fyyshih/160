@@ -185,28 +185,84 @@ function renderScene() {
     // gl.clear(gl.COLOR_BUFFER_BIT);
 
 
-    // test cube:
+    // draw body
     var body = new Cube();
     body.color = [1.0, 0.0, 0.0, 1.0];
-    body.matrix.translate(-.25, -.5, 0.0);
-    body.matrix.scale(0.5, 1, .5);
+    body.matrix.translate(0, -.5, 0.0);
+    body.matrix.scale(0.6, 0.45, 0.45);
     body.render();
 
-    // draw left arm
-    var leftArm = new Cube();
-    leftArm.color = [1, 1, 0, 1];
-    leftArm.matrix.translate(.7, 0, 0.0);
-    leftArm.matrix.rotate(45, 0, 0, 1);
-    leftArm.matrix.scale(.25, .7, .5);
-    leftArm.render();
+    // draw left wing
+    var leftWing = new Cube();
+    leftWing.color = [1, 1, 0, 1];
+    leftWing.matrix.translate(.9, 0.15, -.35);
+    leftWing.matrix.rotate(125, 0, 0, 1);
+    leftWing.matrix.scale(.4, .7, .2);
+    leftWing.render();
 
-    // test box
-    var box = new Cube();
-    box.color = [1,0,1,1];
-    box.matrix.translate(0,0,-.50,0);
-    box.matrix.rotate(-30,1,0,0);
-    box.matrix.scale(-.5,-.5,-.5);
-    box.render();
+    // draw right wing
+    var rightWing = new Cube();
+    rightWing.color = [1, 0.5, 1, 1];
+    rightWing.matrix.translate(.9, 0.15, .1);
+    rightWing.matrix.rotate(125, 0, 0, 1);
+    rightWing.matrix.scale(.4, .7, .2);
+    rightWing.render();
+
+    // draw left leg (top joint)
+    var leftLeg = new Cube();
+    leftLeg.color = [1, 0, 1, 1];
+    leftLeg.matrix.translate(.4, -.8, -.25);
+    leftLeg.matrix.rotate(90, 1, 0, 0);
+    leftLeg.matrix.scale(-.1, -.1, .3);
+    leftLeg.render();
+
+    // draw right leg (top joint)
+    var rightLeg = new Cube();
+    rightLeg.color = [1, 0.5, 0.5, 1];
+    rightLeg.matrix.translate(.4, -.8, -.1);
+    rightLeg.matrix.rotate(90, 1, 0, 0);
+    rightLeg.matrix.scale(-.1, -.1, .3);
+    rightLeg.render();
+
+    // draw left foot 
+    var leftFoot = new Cube();
+    leftFoot.color = [0.5, 0, 1, 1];
+    leftFoot.matrix.translate(.4, -.8, -.25);
+    leftFoot.matrix.rotate(0, 1, 0, 0);
+    leftFoot.matrix.scale(-.25, -.05, .1);
+    leftFoot.render();
+
+    // draw right foot 
+    var rightFoot = new Cube();
+    rightFoot.color = [0.5, 0.5, 1, 1];
+    rightFoot.matrix.translate(.4, -.8, -.1);
+    rightFoot.matrix.rotate(0, 1, 0, 0);
+    rightFoot.matrix.scale(-.25, -.05, .1);
+    rightFoot.render();
+
+    // draw base neck joint (joint 1)
+    var baseNeck = new Cube();
+    baseNeck.color = [0.5, 0.5, 0.5, 1];
+    baseNeck.matrix.translate(0, -.15, -.16);
+    baseNeck.matrix.rotate(50, 0, 0, 1);
+    baseNeck.matrix.scale(.1, .3, .12);
+    baseNeck.render();
+
+    // draw upper neck joint (joint 2)
+    var upperNeck = new Cube();
+    upperNeck.color = [0.8, 0.5, 0.5, 1];
+    upperNeck.matrix.translate(-.25, .08, -.16);
+    upperNeck.matrix.rotate(350, 0, 0, 1);
+    upperNeck.matrix.scale(.1, .5, .12);
+    upperNeck.render();
+
+    // draw head
+    var head = new Cube();
+    head.color = [0.5, 0.8, 0.5, 1];
+    head.matrix.translate(-.28, .43, -.12);
+    head.matrix.rotate(30, 0, 0, 1);
+    head.matrix.scale(.25, .2, .2);
+    head.render();
 
     var duration = performance.now() - startTime;
     sendTextToHTML(" ms: " + Math.floor(duration) + " fps: " + Math.floor(10000/duration)/10, "numdot");
