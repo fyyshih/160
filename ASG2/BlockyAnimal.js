@@ -83,35 +83,24 @@ const TRIANGLE = 1;
 const CIRCLE = 2;
 
 // UI global elements
-let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
-let g_selectedSize = 5;
-let g_selectedType = POINT;
-let g_selectedSegments = 10;
+let g_baseNeckAnimation = false;
+let g_upperNeckAnimation = false;
 let g_globalAngle = 0;
+let g_baseNeckAngle = 0;
+let g_upperNeckAngle = 0;
 
 function addActionsForHtmlUI() {
-    // button events. change STATE, so use "onclick." env unchanged, so don't use event listener
-    document.getElementById("green").onclick = function() { g_selectedColor = [0.0, 1.0, 0.0, 1.0]; };
-    document.getElementById("red").onclick = function() { g_selectedColor = [1.0, 0.0, 0.0, 1.0]; };
-    document.getElementById("clearButton").onclick = function() { g_shapesList = []; renderScene(); }; // call render fn whenever we want to clear
-    document.getElementById("createButton").onclick = function() { createDrawing(); }; // pass REFERENCE to fn, not fn itself (which would be createDrawing())
-    
-    document.getElementById("pointButton").onclick = function() { g_selectedType=POINT };
-    document.getElementById("triButton").onclick = function() { g_selectedType=TRIANGLE };
-    document.getElementById("circleButton").onclick = function() { g_selectedType=CIRCLE };
-    
-    // color slider events
-    document.getElementById("redSlide").addEventListener("mouseup", function () { g_selectedColor[0] = this.value/100; } );
-    document.getElementById("greenSlide").addEventListener("mouseup", function() { g_selectedColor[1] = this.value/100; } );
-    document.getElementById("blueSlide").addEventListener("mouseup", function() { g_selectedColor[2] = this.value/100; } );
+    // button events: animation on/off (both neck joints))
+    document.getElementById('animationBaseNeckOnButton').onclick = function() {g_baseNeckAnimation = true;};
+    document.getElementById('animationBaseNeckOffButton').onclick = function() {g_baseNeckAnimation = false;};
+    document.getElementById('animationUpperNeckOnButton').onclick = function() {g_upperNeckAnimation = true;};
+    document.getElementById('animationUpperNeckOffButton').onclick = function() {g_upperNeckAnimation = false;};
 
-    // size slider event
-    document.getElementById("sizeSlide").addEventListener("mouseup", function() { g_selectedSize = this.value; } );
-
-    // number of segments slider event
-    document.getElementById("segSlide").addEventListener("mouseup", function() { g_selectedSegments = this.value; } );
-
-    // camera angle slider event
+    // slider events: neck angle (both joints)
+    document.getElementById('baseNeckSlide').addEventListener('mousemove', function() { g_baseNeckAngle = this.value; renderScene(); });
+    document.getElementById('upperNeckSlide').addEventListener('mousemove', function() { g_upperNeckAngle = this.value; renderScene(); });
+ 
+    // slider event: camera angle
     document.getElementById("angleSlide").addEventListener("mousemove", function() { g_globalAngle = this.value; renderScene(); } );    
 }
 
@@ -124,52 +113,38 @@ function main() {
     // setting up actions for HTML UI (ex: buttons)
     addActionsForHtmlUI();
 
-    // Register function (event handler) to be called on a mouse press
-    canvas.onmousedown = click;
-    //canvas.onmousemove = click; // <-- this draws as long as your mouse is hovering over the canvas. 
-    canvas.onmousemove = function(ev) { if(ev.buttons == 1) { click(ev) } }; // <-- this draws when your mouse is actually being held down
-
     // Specify the color for clearing <canvas>
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-    renderScene();
+    // automatically calls tick
+    requestAnimationFrame(tick);
 }
 
-var g_shapesList = [];
+var g_startTime = performance.now() / 1000.0;
+var g_seconds = performance.now / 1000.0 - g_startTime;
 
-// var g_points = [];  // The array for the position of a mouse press
-// var g_colors = [];  // The array to store the color of a point
-// var g_sizes = [];   // The array to store the size of a point
+function tick() {
+    // debug/track
+    g_seconds = performance.now() / 1000.0 - g_startTime;
+    
+    // update animation angles
+    updateAnimationAngles();
 
-function click(ev) {
-    let [x, y] = handleClicks(ev);
+    // draw everything
+    renderScene();
 
-    // create and store the new point (initialized w the Point class constructor):
-    let point;
-    if (g_selectedType==POINT) {
-        point = new Point();
-    } else if (g_selectedType==TRIANGLE) {
-        point = new Triangle();
-    } else { // circle
-        point = new Circle();
+    // tell browser to upate again when it has time
+    requestAnimationFrame(tick);
+}
+
+// update angles of everything if currently animated
+function updateAnimationAngles() {
+    if (g_baseNeckAnimation) {
+        g_baseNeckAngle = 45*Math.sin(g_seconds);
     }
-    point.position = [x, y];
-    point.color = g_selectedColor.slice();
-    point.size = g_selectedSize;
-    g_shapesList.push(point);
-
-    renderScene();
-}
-
-function handleClicks(ev) {
-    var x = ev.clientX; // x coordinate of a mouse pointer
-    var y = ev.clientY; // y coordinate of a mouse pointer
-    var rect = ev.target.getBoundingClientRect();
-
-    x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
-    y = (canvas.height/2 - (y - rect.top))/(canvas.height/2);
-
-    return([x, y]);
+    if (g_upperNeckAnimation) {
+        g_upperNeckAngle = 45*Math.sin(g_seconds);
+    }
 }
 
 function renderScene() {
@@ -240,20 +215,25 @@ function renderScene() {
     rightFoot.matrix.scale(-.25, -.05, .1);
     rightFoot.render();
 
-    // draw base neck joint (joint 1)
+    // draw base/lower neck joint (joint 1)
     var baseNeck = new Cube();
     baseNeck.color = [0.5, 0.5, 0.5, 1];
-    baseNeck.matrix.translate(0, -.15, -.16);
+    baseNeck.matrix.translate(.1, -.15, -.16);
     baseNeck.matrix.rotate(50, 0, 0, 1);
-    baseNeck.matrix.scale(.1, .3, .12);
+    baseNeck.matrix.rotate(g_baseNeckAngle, 0, 0, 1);
+    var baseNeckCoordinatesMat = new Matrix4(baseNeck.matrix); // forces it to make a copy instead of passing in same ptr
+    baseNeck.matrix.scale(.1, .4, .12);
     baseNeck.render();
 
     // draw upper neck joint (joint 2)
     var upperNeck = new Cube();
     upperNeck.color = [0.8, 0.5, 0.5, 1];
-    upperNeck.matrix.translate(-.25, .08, -.16);
-    upperNeck.matrix.rotate(350, 0, 0, 1);
+    upperNeck.matrix = baseNeckCoordinatesMat;
+    upperNeck.matrix.translate(0, .35, 0);
+    upperNeck.matrix.rotate(315, 0, 0, 1);
+    upperNeck.matrix.rotate(g_upperNeckAngle, 0, 0, 1);
     upperNeck.matrix.scale(.1, .5, .12);
+    upperNeck.matrix.translate(-.3, .05, -0.001);
     upperNeck.render();
 
     // draw head
@@ -279,10 +259,6 @@ function renderScene() {
     lowerBeak.matrix.rotate(30, 0, 0, 1);
     lowerBeak.matrix.scale(.5, .05, .1);
     lowerBeak.render();
-
-    // TODO:
-    // (1) center beak(s)
-    // (2) align top beak
 
     var duration = performance.now() - startTime;
     sendTextToHTML(" ms: " + Math.floor(duration) + " fps: " + Math.floor(10000/duration)/10, "numdot");
