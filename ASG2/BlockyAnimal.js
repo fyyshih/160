@@ -264,6 +264,26 @@ function renderScene() {
     head.matrix.scale(.25, .2, .2);
     head.render();
 
+    // draw upper beak
+    var upperBeak = new Cube();
+    upperBeak.color = [0.5, 0.8, 0.5, 1];
+    upperBeak.matrix.translate(-.8, .2, -.12);
+    upperBeak.matrix.rotate(30, 0, 0, 1);
+    upperBeak.matrix.scale(.5, .05, .1);
+    upperBeak.render();
+
+    // draw lower beak
+    var lowerBeak = new Cube();
+    lowerBeak.color = [0.5, 0.5, 0.8, 1];
+    lowerBeak.matrix.translate(-.7, .2, -.12);
+    lowerBeak.matrix.rotate(30, 0, 0, 1);
+    lowerBeak.matrix.scale(.5, .05, .1);
+    lowerBeak.render();
+
+    // TODO:
+    // (1) center beak(s)
+    // (2) align top beak
+
     var duration = performance.now() - startTime;
     sendTextToHTML(" ms: " + Math.floor(duration) + " fps: " + Math.floor(10000/duration)/10, "numdot");
 
