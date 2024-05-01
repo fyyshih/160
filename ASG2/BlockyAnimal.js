@@ -145,9 +145,10 @@ function tick() {
 function updateAnimationAngles() {
     if (g_baseNeckAnimation) {
         g_baseNeckAngle = 45*Math.sin(g_seconds);
+        g_baseNeckAngle = Math.max(-45, Math.min(45, g_baseNeckAngle)); // from chatGPT - limiting movement of the neck
     }
     if (g_upperNeckAnimation) {
-        g_upperNeckAngle = 45*Math.sin(g_seconds);
+        g_upperNeckAngle = 30*Math.sin(g_seconds);
     }
     if (g_headAnimation) {
         g_headAngle = 30*Math.sin(g_seconds);
