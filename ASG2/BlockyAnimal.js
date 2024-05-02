@@ -22,7 +22,7 @@ let gl;
 let a_Position;
 let u_FragColor;
 let u_ModelMatrix;
-let u_GlobalRotateMatrix
+let u_GlobalRotateMatrix;
 
 function setupWebGL() {
     // Retrieve <canvas> element
@@ -77,12 +77,8 @@ function connectVariablesToGLSL() {
     gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
 }
 
-// constants
-const POINT = 0;
-const TRIANGLE = 1;
-const CIRCLE = 2;
-
 // UI global elements
+let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
 let g_baseNeckAnimation = false;
 let g_upperNeckAnimation = false;
 let g_headAnimation = false;
@@ -90,6 +86,15 @@ let g_globalAngle = 0;
 let g_baseNeckAngle = 0;
 let g_upperNeckAngle = 0;
 let g_headAngle = 45;
+let g_beakAngle = 0;
+
+let g_lastX = 0;
+let g_lastY = 0;
+let g_x = 0;
+let g_yAngle = 0;
+let g_zAngle = 0;
+let dragging = false;
+let g_beakAnimation = false;
 
 function addActionsForHtmlUI() {
     // button events: animation on/off (both neck joints + head)
@@ -100,12 +105,31 @@ function addActionsForHtmlUI() {
     document.getElementById('animationHeadOnButton').onclick = function() {g_headAnimation = true;};
     document.getElementById('animationHeadOffButton').onclick = function() {g_headAnimation = false;};
 
+
     // slider events: head + neck angle (both joints) 
     document.getElementById('baseNeckSlide').addEventListener('mousemove', function() { g_baseNeckAngle = this.value; renderScene(); });
     document.getElementById('upperNeckSlide').addEventListener('mousemove', function() { g_upperNeckAngle = this.value; renderScene(); });
     document.getElementById('headSlide').addEventListener('mousemove', function() {g_headAngle = this.value; renderScene(); });
     // slider event: camera angle
     document.getElementById("angleSlide").addEventListener("mousemove", function() { g_globalAngle = this.value; renderScene(); } );    
+    // check if shift is also being held down (if true, then animate):
+   
+    // register function (event handler) to be called on a mouse press (from asg1)
+    canvas.onmousedown = function(e) { 
+        console.log('in onmousedown in main()');
+        dragging = true;
+        let [x, y] = convertCoordinatesEventToGL(e);
+        g_lastX = x;
+        g_lastY = y;
+        if (e.shiftKey) {
+            console.log('SHIFT CLICK DETECTED');
+            //g_clickAnimation = !g_clickAnimation // allows for toggling btw on/off using shift+click
+            g_beakAnimation = !g_beakAnimation;
+        }
+    };
+
+    canvas.onmousemove = function(ev) { if(ev.buttons == 1) {click(ev)} }; // will rotat
+    console.log('just after onmousemove');   
 }
 
 function main() {
@@ -118,12 +142,45 @@ function main() {
     addActionsForHtmlUI();
 
     // Specify the color for clearing <canvas>
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.4, 0.73, 0.89, 1.0); // from Google color picker
 
     // automatically calls tick
     requestAnimationFrame(tick);
 }
 
+function click(ev) {
+    console.log("in click");
+    let [x, y] = convertCoordinatesEventToGL(ev);
+    if (dragging) {
+        var dx = 360 * (x - g_lastX);
+        var dy = 360 * (y - g_lastY);
+
+        g_x += dy;
+        g_yAngle += dx;
+        if (Math.abs(g_globalAngle / 360) > 1) {
+            g_x = 0;
+        }
+        if (Math.abs(g_yAngle / 360) > 1) {
+            g_zAngle = 0;
+        }
+        renderScene();
+    }
+    g_lastX = x;
+    g_lastY = y;
+    console.log('x, y is ', x, y);
+    console.log('lastX, lastY is ', g_lastX, g_lastY);
+}
+
+function convertCoordinatesEventToGL(ev) {
+    console.log("in convertCoordinatesEventToGL");
+    var x = ev.clientX; // x coordinate of a mouse pointer
+    var y = ev.clientY; // y coordinate of a mouse pointer
+    var rect = ev.target.getBoundingClientRect();
+
+    x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
+    y = (canvas.height/2 - (y - rect.top))/(canvas.height/2);
+    return [x, y];
+}
 var g_startTime = performance.now() / 1000.0;
 var g_seconds = performance.now / 1000.0 - g_startTime;
 
@@ -153,6 +210,9 @@ function updateAnimationAngles() {
     if (g_headAnimation) {
         g_headAngle = 30*Math.sin(g_seconds);
     }
+    if (g_beakAnimation) {
+        g_beakAngle = (5*Math.sin(3*g_seconds));
+    }
 }
 
 function renderScene() {
@@ -170,14 +230,14 @@ function renderScene() {
 
     // draw body
     var body = new Cube();
-    body.color = [1.0, 0.0, 0.0, 1.0];
+    body.color = [0.8196, 0.4980, 0.1725, 1.0];
     body.matrix.translate(0, -.5, 0.0);
     body.matrix.scale(0.6, 0.45, 0.45);
     body.render();
 
     // draw left wing
     var leftWing = new Cube();
-    leftWing.color = [1, 1, 0, 1];
+    leftWing.color = [0.7076, 0.4482, 0.1553, 1];
     leftWing.matrix.translate(.9, 0.15, -.35);
     leftWing.matrix.rotate(125, 0, 0, 1);
     leftWing.matrix.scale(.4, .7, .2);
@@ -185,7 +245,7 @@ function renderScene() {
 
     // draw right wing
     var rightWing = new Cube();
-    rightWing.color = [1, 0.5, 1, 1];
+    rightWing.color = [0.7076, 0.4482, 0.1553, 1];
     rightWing.matrix.translate(.9, 0.15, .1);
     rightWing.matrix.rotate(125, 0, 0, 1);
     rightWing.matrix.scale(.4, .7, .2);
@@ -193,7 +253,7 @@ function renderScene() {
 
     // draw left leg 
     var leftLeg = new Hexahedron();
-    leftLeg.color = [1, 0, 1, 1];
+    leftLeg.color = [0.4196, 0.2431, 0.0863, 1];
     leftLeg.matrix.translate(.4, -.8, -.25);
     leftLeg.matrix.rotate(90, 1, 0, 0);
     leftLeg.matrix.scale(-.1, -.1, .3);
@@ -201,7 +261,7 @@ function renderScene() {
 
     // draw right leg 
     var rightLeg = new Hexahedron();
-    rightLeg.color = [1, 0.5, 0.5, 1];
+    rightLeg.color = [0.4196, 0.2431, 0.0863, 1];
     rightLeg.matrix.translate(.4, -.8, -.1);
     rightLeg.matrix.rotate(90, 1, 0, 0);
     rightLeg.matrix.scale(-.1, -.1, .3);
@@ -209,7 +269,7 @@ function renderScene() {
 
     // draw left foot 
     var leftFoot = new Cube();
-    leftFoot.color = [0.5, 0, 1, 1];
+    leftFoot.color = [0.9294, 0.4588, 0.0471, 1];
     leftFoot.matrix.translate(.4, -.8, -.25);
     leftFoot.matrix.rotate(0, 1, 0, 0);
     leftFoot.matrix.scale(-.25, -.05, .1);
@@ -217,7 +277,7 @@ function renderScene() {
 
     // draw right foot 
     var rightFoot = new Cube();
-    rightFoot.color = [0.5, 0.5, 1, 1];
+    rightFoot.color = [0.9294, 0.4588, 0.0471, 1]; // periwinkle: [0.5, 0.5, 1, 1];
     rightFoot.matrix.translate(.4, -.8, -.1);
     rightFoot.matrix.rotate(0, 1, 0, 0);
     rightFoot.matrix.scale(-.25, -.05, .1);
@@ -235,7 +295,7 @@ function renderScene() {
 
     // draw upper neck joint (joint 2)
     var upperNeck = new Cube();
-    upperNeck.color = [0.8, 0.5, 0.5, 1];
+    upperNeck.color = [0.6, 0.6, 0.6, 1];
     upperNeck.matrix = baseNeckCoordinatesMat;
     upperNeck.matrix.translate(0, .35, 0);
     upperNeck.matrix.rotate(315, 0, 0, 1);
@@ -247,7 +307,7 @@ function renderScene() {
 
     // draw head
     var head = new Cube();
-    head.color = [0.5, 0.8, 0.5, 1];
+    head.color = [0.8196, 0.4980, 0.1725, 1.0]; // pastel-ish green: [0.5, 0.8, 0.5, 1];
     head.matrix = upperNeckCoordinatesMat;
     head.matrix.scale(-1, 1, 1); // reflect across y axis
     head.matrix.translate(-.08, .4, .03);
@@ -259,17 +319,17 @@ function renderScene() {
 
     // draw upper beak
     var upperBeak = new Cube();
-    upperBeak.color = [0.5, 0.2, 0.5, 1];
+    upperBeak.color = [0.7592, 0.5896, 0.1912, 1];
     upperBeak.matrix = headCoordinatesMat;
     upperBeak.matrix.scale(1, -1, 1);
     upperBeak.matrix.translate(.2, -.1, -.05);
-    upperBeak.matrix.rotate(0, 0, 0, 1);
+    upperBeak.matrix.rotate(g_beakAngle, 0, 0, 1);
     upperBeak.matrix.scale(.5, .05, .1);
     upperBeak.render();
 
     // draw lower beak
     var lowerBeak = new Cube();
-    lowerBeak.color = [0.5, 0.5, 0.8, 1];
+    lowerBeak.color = [0.949, 0.737, 0.239, 1];
     lowerBeak.matrix = headCoordinatesMat;
     lowerBeak.matrix.scale(1, -1, 1);
     lowerBeak.matrix.translate(0, -1.9, 0);
@@ -278,7 +338,6 @@ function renderScene() {
 
     var duration = performance.now() - startTime;
     sendTextToHTML(" ms: " + Math.floor(duration) + " fps: " + Math.floor(10000/duration)/10, "numdot");
-
 }
 
 // sets the text of an HTML element
