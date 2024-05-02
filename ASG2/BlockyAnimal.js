@@ -88,12 +88,12 @@ let g_upperNeckAngle = 0;
 let g_headAngle = 45;
 let g_beakAngle = 0;
 
-let g_lastX = 0;
-let g_lastY = 0;
-let g_x = 0;
-let g_yAngle = 0;
-let g_zAngle = 0;
-let dragging = false;
+// variables for mouseDrag rotation + animation (shift+click)
+let g_prevX = 0;
+let g_prevY = 0;
+let g_nX = 0;
+let g_nY = 0;
+let mouseDrag = false;
 let g_beakAnimation = false;
 
 function addActionsForHtmlUI() {
@@ -106,30 +106,29 @@ function addActionsForHtmlUI() {
     document.getElementById('animationHeadOffButton').onclick = function() {g_headAnimation = false;};
 
 
-    // slider events: head + neck angle (both joints) 
-    document.getElementById('baseNeckSlide').addEventListener('mousemove', function() { g_baseNeckAngle = this.value; renderScene(); });
-    document.getElementById('upperNeckSlide').addEventListener('mousemove', function() { g_upperNeckAngle = this.value; renderScene(); });
-    document.getElementById('headSlide').addEventListener('mousemove', function() {g_headAngle = this.value; renderScene(); });
+    // slider events: head + neck angle (both joints). "input" instead of "mousemove".
+    document.getElementById('baseNeckSlide').addEventListener('input', function() { g_baseNeckAngle = this.value; renderScene(); });
+    document.getElementById('upperNeckSlide').addEventListener('input', function() { g_upperNeckAngle = this.value; renderScene(); });
+    document.getElementById('headSlide').addEventListener('input', function() {g_headAngle = this.value; renderScene(); });
     // slider event: camera angle
-    document.getElementById("angleSlide").addEventListener("mousemove", function() { g_globalAngle = this.value; renderScene(); } );    
+    document.getElementById("angleSlide").addEventListener("input", function() { g_globalAngle = this.value; renderScene(); } );    
     // check if shift is also being held down (if true, then animate):
    
     // register function (event handler) to be called on a mouse press (from asg1)
     canvas.onmousedown = function(e) { 
-        console.log('in onmousedown in main()');
-        dragging = true;
+        // console.log('in onmousedown in main()');
+        mouseDrag = true;
         let [x, y] = convertCoordinatesEventToGL(e);
-        g_lastX = x;
-        g_lastY = y;
+        g_prevX = x;
+        g_prevY = y;
         if (e.shiftKey) {
-            console.log('SHIFT CLICK DETECTED');
-            //g_clickAnimation = !g_clickAnimation // allows for toggling btw on/off using shift+click
-            g_beakAnimation = !g_beakAnimation;
+            // console.log('SHIFT CLICK DETECTED');
+            g_beakAnimation = !g_beakAnimation; // allows for toggling between on/off (vs. just g_beakAnimation = true;)
         }
     };
 
     canvas.onmousemove = function(ev) { if(ev.buttons == 1) {click(ev)} }; // will rotat
-    console.log('just after onmousemove');   
+    // console.log('just after onmousemove');   
 }
 
 function main() {
@@ -149,32 +148,30 @@ function main() {
 }
 
 function click(ev) {
-    console.log("in click");
+    // console.log("in click");
     let [x, y] = convertCoordinatesEventToGL(ev);
-    if (dragging) {
-        var dx = 360 * (x - g_lastX);
-        var dy = 360 * (y - g_lastY);
+    if (mouseDrag) {
+        var currX = 360 * (x - g_prevX) * -1; // (* -1) to prevent mirroring
+        var currY = 360 * (y - g_prevY);
 
-        g_x += dy;
-        g_yAngle += dx;
+        g_nX += currY;
+        g_nY += currX;
+
+        // set to 0 if > 360
         if (Math.abs(g_globalAngle / 360) > 1) {
-            g_x = 0;
+            g_nX = 0;
         }
-        if (Math.abs(g_yAngle / 360) > 1) {
-            g_zAngle = 0;
-        }
-        renderScene();
     }
-    g_lastX = x;
-    g_lastY = y;
-    console.log('x, y is ', x, y);
-    console.log('lastX, lastY is ', g_lastX, g_lastY);
+    g_prevX = x;
+    g_prevY = y;
+    // console.log('x, y is ', x, y);
+    // console.log('lastX, lastY is ', g_lastX, g_lastY);
 }
 
 function convertCoordinatesEventToGL(ev) {
-    console.log("in convertCoordinatesEventToGL");
     var x = ev.clientX; // x coordinate of a mouse pointer
     var y = ev.clientY; // y coordinate of a mouse pointer
+
     var rect = ev.target.getBoundingClientRect();
 
     x = ((x - rect.left) - canvas.width/2)/(canvas.width/2);
@@ -221,6 +218,8 @@ function renderScene() {
 
     // pass the matrix to u_ModelMatrix attribute
     var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
+    globalRotMat.rotate(g_nX, 1, 0, 0);
+    globalRotMat.rotate(g_nY, 0, 1, 0);
     gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
     
     // Clear <canvas>
@@ -251,7 +250,7 @@ function renderScene() {
     rightWing.matrix.scale(.4, .7, .2);
     rightWing.render();
 
-    // draw left leg 
+    // draw left leg 2
     var leftLeg = new Hexahedron();
     leftLeg.color = [0.4196, 0.2431, 0.0863, 1];
     leftLeg.matrix.translate(.4, -.8, -.25);
