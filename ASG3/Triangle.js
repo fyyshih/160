@@ -1,7 +1,7 @@
 class Triangle {
     constructor() {
       this.type="triangle";
-      this.position = [0.0, 0.0, 0.0]; //[[0.0, 0.0],  [0.0, 0.0], [0.0, 0.0]];
+      this.position = [[0.0, 0.0],  [0.0, 0.0], [0.0, 0.0]];
       this.color = [1.0, 1.0, 1.0, 1.0];
       this.size = 5.0;
 
@@ -65,6 +65,7 @@ class Triangle {
     gl.drawArrays(gl.TRIANGLES, 0, n);
   }
 
+
   function drawTriangle3DUV(vertices, uv) {
     // set num vertices:
     var n = 3; // FIXME: should be set to vertices/3
@@ -83,7 +84,7 @@ class Triangle {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
     // assign buffer obj to a_Position var
-    gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
 
     // enable assignment to a_Position var
     gl.enableVertexAttribArray(a_Position);
