@@ -84,7 +84,7 @@ class Triangle {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
     // assign buffer obj to a_Position var
-    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
 
     // enable assignment to a_Position var
     gl.enableVertexAttribArray(a_Position);
