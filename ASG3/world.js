@@ -268,14 +268,15 @@ function renderScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     // gl.clear(gl.COLOR_BUFFER_BIT);
 
-
+    
     // draw body
     var body = new Cube();
     body.color = [0.8196, 0.4980, 0.1725, 1.0];
     body.matrix.translate(0, -.5, 0.0);
     body.matrix.scale(0.6, 0.45, 0.45);
     body.render();
-
+    
+    
     // draw left wing
     var leftWing = new Cube();
     leftWing.color = [0.7076, 0.4482, 0.1553, 1];
@@ -283,7 +284,7 @@ function renderScene() {
     leftWing.matrix.rotate(125, 0, 0, 1);
     leftWing.matrix.scale(.4, .7, .2);
     leftWing.render();
-
+    
     // draw right wing
     var rightWing = new Cube();
     rightWing.color = [0.7076, 0.4482, 0.1553, 1];
@@ -291,7 +292,8 @@ function renderScene() {
     rightWing.matrix.rotate(125, 0, 0, 1);
     rightWing.matrix.scale(.4, .7, .2);
     rightWing.render();
-
+    
+    
     // draw left leg 2
     var leftLeg = new Hexahedron();
     leftLeg.color = [0.4196, 0.2431, 0.0863, 1];
@@ -299,6 +301,7 @@ function renderScene() {
     leftLeg.matrix.rotate(90, 1, 0, 0);
     leftLeg.matrix.scale(-.1, -.1, .3);
     leftLeg.render();
+    
 
     // draw right leg 
     var rightLeg = new Hexahedron();
@@ -307,7 +310,7 @@ function renderScene() {
     rightLeg.matrix.rotate(90, 1, 0, 0);
     rightLeg.matrix.scale(-.1, -.1, .3);
     rightLeg.render();
-
+    
     // draw left foot 
     var leftFoot = new Cube();
     leftFoot.color = [0.9294, 0.4588, 0.0471, 1];
@@ -376,6 +379,7 @@ function renderScene() {
     lowerBeak.matrix.translate(0, -1.9, 0);
     lowerBeak.matrix.rotate(0, 0, 0, 1);
     lowerBeak.render();
+    
 
     var duration = performance.now() - startTime;
     sendTextToHTML(" ms: " + Math.floor(duration) + " fps: " + Math.floor(10000/duration)/10, "numdot");
