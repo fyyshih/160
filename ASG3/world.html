@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Blocky World</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="400" height="400">
+    Please use a browser that supports "canvas"
+    </canvas>
+
+    <!-- adding numdot: -->
+    <p id="numdot"> XXX </p>
+
+    <!-- adding camera angle slider: -->
+    XXX <input type="range" min="0" max="360" value="0" class="slider" id="angleSlide">
+    </p>
+
+    <!-- adding base neck slide -->
+    XXX <input type="range" min="0" max="45" value="0" class="slider" id="upperNeckSlide">
+    Animation:
+    <button type="button" id="animationUpperNeckOnButton">ON</button>
+    <button type="button" id="animationUpperNeckOffButton">OFF</button>
+    <p></p>
+    XXX <input type="range" min="0" max="90" value="0" class="slider" id="baseNeckSlide">
+    Animation:
+    <button type="button" id="animationBaseNeckOnButton">ON</button>
+    <button type="button" id="animationBaseNeckOffButton">OFF</button>
+    <p></p>
+    XXX <input type="range" min="0" max="45" value="0" class="slider" id="headSlide">
+    Animation:
+    <button type="button" id="animationHeadOnButton">ON</button>
+    <button type="button" id="animationHeadOffButton">OFF</button> 
+
+    <script src="libs/webgl-utils.js"></script>
+    <script src="libs/webgl-debug.js"></script>
+    <script src="libs/cuon-utils.js"></script>
+    <script src="libs/cuon-matrix.js"></script>
+    <script src="Point.js"></script>
+    <script src="world.js"></script>
+    <script src="Triangle.js"></script>
+    <script src="Circle.js"></script>
+    <script src="Create.js"></script>
+    <script src="Cube.js"></script>
+    <script src="Hexahedron.js"></script>
+  </body>
+</html>
