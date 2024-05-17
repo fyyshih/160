@@ -20,6 +20,7 @@ var FSHADER_SOURCE = `
     varying vec2 v_UV;
     uniform vec4 u_FragColor;
     uniform sampler2D u_Sampler0;
+    uniform sampler2D u_Sampler1;
     uniform int u_whichTexture;
     void main() {
         if (u_whichTexture == -2) {
@@ -28,6 +29,8 @@ var FSHADER_SOURCE = `
             gl_FragColor = vec4(v_UV, 1.0, 1.0);                // Use UV debug
         } else if (u_whichTexture == 0) {
             gl_FragColor = texture2D(u_Sampler0, v_UV);         // Use texture0
+        } else if (u_whichTexture == 1) {
+            gl_FragColor = texture2D(u_Sampler1, v_UV);         // Use texture1
         } else {
             gl_FragColor = vec4(1, 0.2, 0.2, 1);                // Error
         }
@@ -122,6 +125,12 @@ function connectVariablesToGLSL() {
         return;
     }
 
+    u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
+    if (!u_Sampler1) {
+        console.log('Failed to get the storage location of u_Sampler1');
+        return;
+    }
+
     u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
     if (!u_whichTexture) {
         console.log('Failed to get the storage location of u_whichTexture');
@@ -202,7 +211,13 @@ function initTextures() { // loads, sends to texture
     // Register the event handler to be called on loading an image
     image.onload = function(){ console.log('initializing texture0'); sendImageToTEXTURE0(image); };
     // after loading the image, send to GLSL
-    image.src = 'burp.jpg';
+    if (u_whichTexture == 0) {
+        image.src = 'burp.jpg';
+    } else if (u_whichTexture == 1) {
+        image.src = 'temp.jpg';
+    } else {
+        image.src = 'temp.jpg';
+    }
 
     // add more texture loading HERE
   
@@ -231,6 +246,8 @@ function sendImageToTEXTURE0(image) {
     
     // Set the texture unit 0 to the sampler
     gl.uniform1i(u_Sampler0, 0);
+
+    gl.uniform1i(u_Sampler1, 0);
     
     // gl.clear(gl.COLOR_BUFFER_BIT);   // Clear <canvas>
   
@@ -246,6 +263,9 @@ function main() {
 
     // setting up actions for HTML UI (ex: buttons)
     addActionsForHtmlUI();
+
+    // keyboard fn - WASD
+    document.onkeydown = keydown;
 
     // initialize texture
     initTextures();
@@ -322,6 +342,17 @@ function updateAnimationAngles() {
     }
 }
 
+// WASD/keyboard controls for camera:
+function keydown(ev) {
+    if (ev.keyCode == 39) {
+        g_eye[0] += 0.2;
+    } else if (ev.keyCode == 37) {
+        g_eye[0] -= 0.2;
+    }
+    renderScene();
+    console.log(ev.keyCode);
+}
+
 // set up variables to control the camera
 var g_eye = [0,0,3];
 var g_at = [0,0,-100];
@@ -350,6 +381,23 @@ function renderScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     // gl.clear(gl.COLOR_BUFFER_BIT);
 
+    // draw FLOOR
+    var floor = new Cube();
+    floor.color = [1.0,0.0,0.0,1.0];
+    floor.textureNum = 0;
+    floor.matrix.translate(-5.0, -0.86, 5.0);
+    floor.matrix.scale(10, 0, 10);
+    //floor.matrix.translate(-0.5, 0, -0.5);
+    floor.render();
+
+    // draw SKY
+    var sky = new Cube();
+    sky.color = [1.0, 0.0, 0.0, 1.0];
+    sky.textureNum = 1;
+    sky.matrix.translate(0, -0.75, 0.0);
+    sky.matrix.scale(10, 0, 10);
+    sky.matrix.translate(-0.5, 0, -0.5);
+    sky.render();
     
     // draw body
     var body = new Cube();
