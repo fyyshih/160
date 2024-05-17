@@ -43,6 +43,7 @@ let u_ModelMatrix;
 let u_ProjectionMatrix;
 let u_ViewMatrix;
 let u_GlobalRotateMatrix;
+let u_whichTexture;
 
 
 function setupWebGL() {
@@ -118,6 +119,12 @@ function connectVariablesToGLSL() {
     u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
     if (!u_Sampler0) {
         console.log('Failed to get the storage location of u_Sampler0');
+        return;
+    }
+
+    u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
+    if (!u_whichTexture) {
+        console.log('Failed to get the storage location of u_whichTexture');
         return;
     }
 
@@ -319,6 +326,14 @@ function renderScene() {
 
     var startTime = performance.now();
 
+    // pass the projection matrix
+    var projMat = new Matrix4();
+    gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
+
+    // pass the view matrix
+    var viewMat = new Matrix4();
+    gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
+
     // pass the matrix to u_ModelMatrix attribute
     var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
     globalRotMat.rotate(g_nX, 1, 0, 0);
@@ -333,6 +348,7 @@ function renderScene() {
     // draw body
     var body = new Cube();
     body.color = [0.8196, 0.4980, 0.1725, 1.0];
+    body.textureNum = 0;
     body.matrix.translate(0, -.5, 0.0);
     body.matrix.scale(0.6, 0.45, 0.45);
     body.render();
@@ -375,6 +391,7 @@ function renderScene() {
     // draw left foot 
     var leftFoot = new Cube();
     leftFoot.color = [0.9294, 0.4588, 0.0471, 1];
+    leftFoot.textureNum = 0;
     leftFoot.matrix.translate(.4, -.8, -.25);
     leftFoot.matrix.rotate(0, 1, 0, 0);
     leftFoot.matrix.scale(-.25, -.05, .1);
@@ -383,6 +400,7 @@ function renderScene() {
     // draw right foot 
     var rightFoot = new Cube();
     rightFoot.color = [0.9294, 0.4588, 0.0471, 1]; // periwinkle: [0.5, 0.5, 1, 1];
+    rightFoot.textureNum = 0;
     rightFoot.matrix.translate(.4, -.8, -.1);
     rightFoot.matrix.rotate(0, 1, 0, 0);
     rightFoot.matrix.scale(-.25, -.05, .1);
@@ -413,6 +431,7 @@ function renderScene() {
     // draw head
     var head = new Cube();
     head.color = [0.8196, 0.4980, 0.1725, 1.0]; // pastel-ish green: [0.5, 0.8, 0.5, 1];
+    head.textureNum = 0;
     head.matrix = upperNeckCoordinatesMat;
     head.matrix.scale(-1, 1, 1); // reflect across y axis
     head.matrix.translate(-.08, .4, .03);
@@ -425,6 +444,7 @@ function renderScene() {
     // draw upper beak
     var upperBeak = new Cube();
     upperBeak.color = [0.7592, 0.5896, 0.1912, 1];
+    upperBeak.textureNum = 0;
     upperBeak.matrix = headCoordinatesMat;
     upperBeak.matrix.scale(1, -1, 1);
     upperBeak.matrix.translate(.2, -.1, -.05);
@@ -435,6 +455,7 @@ function renderScene() {
     // draw lower beak
     var lowerBeak = new Cube();
     lowerBeak.color = [0.949, 0.737, 0.239, 1];
+    lowerBeak.textureNum = 0;
     lowerBeak.matrix = headCoordinatesMat;
     lowerBeak.matrix.scale(1, -1, 1);
     lowerBeak.matrix.translate(0, -1.9, 0);
