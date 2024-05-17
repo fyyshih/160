@@ -10,8 +10,8 @@ var VSHADER_SOURCE = `
     uniform mat4 u_ViewMatrix;
     uniform mat4 u_ProjectionMatrix;
     void main() {
-      gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
-      v_UV = a_UV;
+        gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
+        v_UV = a_UV;
     }`
 
 // Fragment shader program
@@ -19,9 +19,18 @@ var FSHADER_SOURCE = `
     precision mediump float;
     varying vec2 v_UV;
     uniform vec4 u_FragColor;
+    uniform sampler2D u_Sampler0;
+    uniform int u_whichTexture;
     void main() {
-      gl_FragColor = u_FragColor;
-      gl_FragColor = vec4(v_UV, 1.0, 1.0);
+        if (u_whichTexture == -2) {
+            gl_FragColor = u_FragColor;                         // Use color
+        } else if (u_whichTexture == -1) {
+            gl_FragColor = vec4(v_UV, 1.0, 1.0);                // Use UV debug
+        } else if (u_whichTexture == 0) {
+            gl_FragColor = texture2D(u_Sampler0, v_UV);         // Use texture0
+        } else {
+            gl_FragColor = vec4(1, 0.2, 0.2, 1);                // Error
+        }
     }`
 
 
@@ -34,6 +43,7 @@ let u_ModelMatrix;
 let u_ProjectionMatrix;
 let u_ViewMatrix;
 let u_GlobalRotateMatrix;
+
 
 function setupWebGL() {
     // Retrieve <canvas> element
@@ -105,11 +115,11 @@ function connectVariablesToGLSL() {
     }    
 
     // // Get the storage location of u_Sampler
-    // u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
-    // if (!u_Sampler0) {
-    //     console.log('Failed to get the storage location of u_Sampler0');
-    //     return;
-    // }
+    u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
+    if (!u_Sampler0) {
+        console.log('Failed to get the storage location of u_Sampler0');
+        return;
+    }
 
     // set initial vlue of matrix to identity matrix
     var identityM = new Matrix4();
@@ -173,6 +183,54 @@ function addActionsForHtmlUI() {
     // console.log('just after onmousemove');   
 }
 
+// from Matsuda -- TexturedQuad.js (initTextures() and loadTexture())
+function initTextures() { // loads, sends to texture
+    var image = new Image();  // Create the image object
+    if (!image) {
+        console.log('Failed to create the image object');
+        return false;
+    } else {
+        console.log("created the image object");
+    }
+    // Register the event handler to be called on loading an image
+    image.onload = function(){ console.log('initializing texture0'); sendImageToTEXTURE0(image); };
+    // after loading the image, send to GLSL
+    image.src = 'burp.jpg';
+
+    // add more texture loading HERE
+  
+    return true;
+}
+  
+function sendImageToTEXTURE0(image) {
+    console.log('sending image to texture0');
+    // create a texture object
+    var texture = gl.createTexture();   // Create a texture object
+    if (!texture) {
+        console.log('Failed to create the texture object');
+        return false;
+    }
+
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
+    // Enable texture unit0
+    gl.activeTexture(gl.TEXTURE0);
+    // Bind the texture object to the target
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+  
+    // Set the texture parameters - "how are we going to use these textures?"
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    // send image so that it lives on the cpu
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+    
+    // Set the texture unit 0 to the sampler
+    gl.uniform1i(u_Sampler0, 0);
+    
+    // gl.clear(gl.COLOR_BUFFER_BIT);   // Clear <canvas>
+  
+    // gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // Draw the rectangle
+    console.log("Finished loadTexture");
+}
+
 function main() {
     // set up canvas and gl variables
     setupWebGL();
@@ -181,6 +239,9 @@ function main() {
 
     // setting up actions for HTML UI (ex: buttons)
     addActionsForHtmlUI();
+
+    // initialize texture
+    initTextures();
 
     // Specify the color for clearing <canvas>
     gl.clearColor(0.4, 0.73, 0.89, 1.0); // from Google color picker
