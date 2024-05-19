@@ -47,6 +47,8 @@ let u_ProjectionMatrix;
 let u_ViewMatrix;
 let u_GlobalRotateMatrix;
 let u_whichTexture;
+let u_Sampler0;
+let u_Sampler1;
 
 
 function setupWebGL() {
@@ -201,30 +203,26 @@ function addActionsForHtmlUI() {
 
 // from Matsuda -- TexturedQuad.js (initTextures() and loadTexture())
 function initTextures() { // loads, sends to texture
-    var image = new Image();  // Create the image object
-    if (!image) {
+    var image0 = new Image();  // Create the image object
+    var image1 = new Image();
+    var image2 = new Image();
+    if (!image0 || !image1 || !image2) {
         console.log('Failed to create the image object');
         return false;
     } else {
         console.log("created the image object");
     }
-    // Register the event handler to be called on loading an image
-    image.onload = function(){ console.log('initializing texture0'); sendImageToTEXTURE0(image); };
-    // after loading the image, send to GLSL
-    if (u_whichTexture == 0) {
-        image.src = 'burp.jpg';
-    } else if (u_whichTexture == 1) {
-        image.src = 'temp.jpg';
-    } else {
-        image.src = 'temp.jpg';
-    }
 
-    // add more texture loading HERE
+    // Register the event handler to be called on loading an image
+    image0.onload = function(){ sendImageToTexture(u_Sampler0, image0, 0); };
+    image1.onload = function(){ sendImageToTexture(u_Sampler1, image1, 1); };
+    image0.src = "burp.jpg";
+    image1.src = "aerial.png";
   
     return true;
 }
   
-function sendImageToTEXTURE0(image) {
+function sendImageToTexture(sampler, image, num) {
     console.log('sending image to texture0');
     // create a texture object
     var texture = gl.createTexture();   // Create a texture object
@@ -235,7 +233,11 @@ function sendImageToTEXTURE0(image) {
 
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
     // Enable texture unit0
-    gl.activeTexture(gl.TEXTURE0);
+    if (num == 0) {
+        gl.activeTexture(gl.TEXTURE0);
+    } else if (num == 1) {
+        gl.activeTexture(gl.TEXTURE1);
+    }
     // Bind the texture object to the target
     gl.bindTexture(gl.TEXTURE_2D, texture);
   
@@ -245,9 +247,7 @@ function sendImageToTEXTURE0(image) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
     
     // Set the texture unit 0 to the sampler
-    gl.uniform1i(u_Sampler0, 0);
-
-    gl.uniform1i(u_Sampler1, 0);
+    gl.uniform1i(sampler, num);
     
     // gl.clear(gl.COLOR_BUFFER_BIT);   // Clear <canvas>
   
@@ -355,7 +355,7 @@ function keydown(ev) {
 
 // set up variables to control the camera
 var g_eye = [0,0,3];
-var g_at = [0,0,-100];
+var g_at = [0,3,-100];
 var g_up = [0,1,0];
 function renderScene() {
 
@@ -394,9 +394,8 @@ function renderScene() {
     var sky = new Cube();
     sky.color = [1.0, 0.0, 0.0, 1.0];
     sky.textureNum = 1;
-    sky.matrix.translate(0, -0.75, 0.0);
-    sky.matrix.scale(10, 0, 10);
-    sky.matrix.translate(-0.5, 0, -0.5);
+    sky.matrix.translate(-5.0, -0.88, 5.0); // (1, -0.5, 2);
+    sky.matrix.scale(50, 50, 50);
     sky.render();
     
     // draw body
