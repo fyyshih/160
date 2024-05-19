@@ -353,6 +353,7 @@ function keydown(ev) {
     console.log(ev.keyCode);
 }
 
+
 // set up variables to control the camera
 var g_eye = [0,0,3];
 var g_at = [0,3,-100];
