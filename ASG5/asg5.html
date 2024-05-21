@@ -16,12 +16,19 @@
             }
         }
     </script>
+    <canvas id="c"></canvas>
+    <div class="split">
+       <div id="view1" tabindex="1"></div>
+       <div id="view2" tabindex="2"></div>
+    </div>
     <script type="module">
         import * as THREE from 'three';
         import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
         import {OBJLoader} from 'three/addons/loaders/OBJLoader.js';
+        import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
         function main() {
+            
 
             const canvas = document.querySelector('#c');
             const renderer = new THREE.WebGLRenderer({antialias: true, canvas});
@@ -30,11 +37,53 @@
             const fov = 75; // field of view. fov always in degrees.
             const aspect = 2; // canvas default
             const near = 0.1;
-            const far = 5;
+            const far = 21;
             const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-            camera.position.z = 2; // moves camera up 2 units on z-axis
+            camera.position.set = (0, 3, 0); // moves camera up x units on z-axis
+            // const cameraHelper = new THREE.CameraHelper(camera);
+
+            // const scene = new THREE.Scene();
+
+            class MinMaxGUIHelper {
+                constructor(obj, minProp, maxProp, minDif) {
+                    this.obj = obj;
+                    this.minProp = minProp;
+                    this.maxProp = maxProp;
+                    this.minDif = minDif;
+                }
+                get min() {
+                    return this.obj[this.minProp];
+                }
+                set min(v) {
+                    this.obj[this.minProp] = v;
+                    this.obj[this.maxProp] = Math.max(this.obj[this.maxProp], v + this.minDif);
+                }
+                get max() {
+                    return this.obj[this.maxProp];
+                }
+                set max(v) {
+                    this.obj[this.maxProp] = v;
+                    this.min = this.min;  // this will call the min setter
+                }
+            }
+
+            function updateCamera() {
+                camera.updateProjectionMatrix();
+            }
+ 
+            const gui = new GUI();
+            gui.add(camera, 'fov', 1, 180).onChange(updateCamera);
+            const minMaxGUIHelper = new MinMaxGUIHelper(camera, 'near', 'far', 0.1);
+            gui.add(minMaxGUIHelper, 'min', 0.1, 50, 0.1).name('near').onChange(updateCamera);
+            gui.add(minMaxGUIHelper, 'max', 0.1, 50, 0.1).name('far').onChange(updateCamera);
+
+            const controls = new OrbitControls(camera, canvas);
+            controls.target.set(0, 5, 0);
+            controls.update();
 
             const scene = new THREE.Scene();
+            scene.background = new THREE.Color("black");
+
 
             // ----------- draw cube -----------
             // creating a BoxGeometry (contains data for a box)
@@ -60,6 +109,7 @@
                 const cube = new THREE.Mesh(geometry, materials);
                 scene.add(cube); // adds non-rotating cube
                 cubes.push(cube);
+                cube.position.set(0, 6, 0);
                 // render the scene by calling renderer's render fn + passing in scene and camera
                 // renderer.render(scene, camera); --> call in render()
                 renderer.setSize(500, 250, false);
@@ -69,28 +119,43 @@
                     texture.colorSpace = THREE.SRGBColorSpace;
                     return texture;
                 }
+                function setScissorForElement(elem) {
+                    const canvasRect = canvas.getBoundingClientRect();
+                    const elemRect = elem.getBoundingClientRect();
+                    
+                    // compute a canvas relative rectangle
+                    const right = Math.min(elemRect.right, canvasRect.right) - canvasRect.left;
+                    const left = Math.max(0, elemRect.left - canvasRect.left);
+                    const bottom = Math.min(elemRect.bottom, canvasRect.bottom) - canvasRect.top;
+                    const top = Math.max(0, elemRect.top - canvasRect.top);
+                    
+                    const width = Math.min(canvasRect.width, right - left);
+                    const height = Math.min(canvasRect.height, bottom - top);
+                    
+                    // setup the scissor to only render to that part of the canvas
+                    const positiveYUpBottom = canvasRect.height - bottom;
+                    renderer.setScissor(left, positiveYUpBottom, width, height);
+                    renderer.setViewport(left, positiveYUpBottom, width, height);
+                    
+                    // return the aspect
+                    return width / height;
+                }
 
-            // // create directional light (has position + target, default (0,0,0))
-            //     const color = 0xFFFFFF;
-            //     const intensity = 3;
-            //     const light = new THREE.DirectionalLight(color, intensity);
-            //     light.position.set(-1, 2, 4); // light set slightly left, above, and behind camera
-            //     scene.add(light); // target still default(0,0,0), so shines towards origin
 
             // RENDERING FUNCTION
-                function render(time) {
-                    time *= 0.001; // converts time --> seconds
+            function render(time) {
+                time *= 0.001; // converts time --> seconds
 
-                    cubes.forEach((cube, ndx) => {
-                        const speed = .2 + ndx * .1;
-                        const rot = time*speed;
-                        cube.rotation.x = rot;
-                        cube.rotation.y = rot;
-                    });
+                cubes.forEach((cube, ndx) => {
+                    const speed = .2 + ndx * .1;
+                    const rot = time*speed;
+                    cube.rotation.x = rot;
+                    cube.rotation.y = rot;
+                });
 
-                    renderer.render(scene, camera);
-                    requestAnimationFrame(render); // request to browser that you want to animate something
-                    // browser calls this fn, will re-render pg if anything updates here
+                renderer.render(scene, camera);
+                requestAnimationFrame(render); // request to browser that you want to animate something
+                // browser calls this fn, will re-render pg if anything updates here
                 }
 
             // ---------- ADDING CYLINDER -----------
@@ -108,8 +173,7 @@
                 const material2 = new THREE.MeshPhongMaterial( { color: 0xD197EA } );
                 const cylinder = new THREE.Mesh(geometry2, material2);
                 scene.add(cylinder);
-                cylinder.position.x = -1.5;
-                cylinder.position.y = -1;
+                cylinder.position.set(0, 6, -5);
 
                 function animateCylinder() {
                     requestAnimationFrame(animateCylinder);
@@ -133,7 +197,7 @@
                 const octahedron = new THREE.Mesh(geometry3, material3);
                 scene.add(octahedron);
 
-                octahedron.position.set(2.25, 0, -1);
+                octahedron.position.set(0, 6, 5);
                 requestAnimationFrame(render);
 
                 function animateOctahedron() {
@@ -148,17 +212,25 @@
             }   
             
             function renderLights() {
-                let color = 0xFA6E52;
-                let intensity = 1;
-                let light = new THREE.DirectionalLight(color, intensity);
-                light.position.set(10, 10, 10);
-                scene.add(light); 
+                // (1) directional light
+                let dir_color = 0xFD3B14;
+                let dir_intensity = 1000;
+                let dir_light = new THREE.DirectionalLight(dir_color, dir_intensity);
+                dir_light.position.set(0, 3, 0);
+                scene.add(dir_light); 
 
-                color = 0x0700E4;
-                intensity = 2;
-                light = new THREE.DirectionalLight(color, intensity);
-                light.position.set(-10, -10, -10);
-                scene.add(light);
+                // (2) create ambient light
+                const amb_color = 0xB1E1FF;
+                const amb_intensity = 1;
+                const amb_light = new THREE.AmbientLight(amb_color, amb_intensity);
+                scene.add(amb_light);
+
+                // (3) hemisphere - basically "blended" light
+                const skyColor = 0xFF000000;  // light blue
+                const groundColor = 0xB97A20;  // brownish orange
+                const hem_intensity = 2;
+                const hem_light = new THREE.HemisphereLight(skyColor, groundColor, hem_intensity);
+                scene.add(hem_light);
             }
 
             // drawCube();
