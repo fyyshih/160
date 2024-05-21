@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
 </head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>three.js 5A</title>
+    <title>three.js 5B</title>
 </head>
 <body>
     <canvas id="c"></canvas>
@@ -140,6 +140,20 @@
                     // return the aspect
                     return width / height;
                 }
+            
+                // CUBEMAP/SKYBOX
+                {
+                    const loader = new THREE.CubeTextureLoader();
+                    const texture = loader.load([
+                        './egg.jpg',
+                        './egg.jpg',
+                        './egg.jpg',
+                        './egg.jpg',
+                        './egg.jpg',
+                        './egg.jpg',
+                    ]);
+                    scene.background = texture;
+                }
 
 
             // RENDERING FUNCTION
@@ -193,7 +207,7 @@
 
                 const loader = new THREE.TextureLoader();
                 const geometry3 = new THREE.OctahedronGeometry(radius, detail);
-                const material3 = new THREE.MeshPhongMaterial( {color: 0xffffff} );
+                const material3 = new THREE.MeshPhongMaterial( {color: 0x4D45D9} );
                 const octahedron = new THREE.Mesh(geometry3, material3);
                 scene.add(octahedron);
 
@@ -210,45 +224,78 @@
                 animateOctahedron();
 
             }   
+
+        // DRAW EGGS
+        function drawEggCylinder() {
+            const radiusTop = 1;
+            const radiusBottom = 1;
+            const height = 0.5;
+            const radialSegments = 10;
+            const heightSegments = 1;
+            const openEnded = false;
+            const thetaStart = 0;
+            const thetaLength = (2 * Math.PI);
+
+            const geometry2 = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
+            const material2 = new THREE.MeshPhongMaterial( { color: 0xFFFFFFFF } );
+            const cylinder = new THREE.Mesh(geometry2, material2);
+            scene.add(cylinder);
+            cylinder.position.set(0, 4, 0);
+
+            scene.add(cylinder);
+            cylinder.position.set(0, 6, 0);
+
+            const geometry = new THREE.TorusGeometry( 100, 30, 50, 100 ); 
+            const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } ); 
+            const torus = new THREE.Mesh( geometry, material ); scene.add( torus );
+            torus.position.set(0, 6, 0);
+        }
             
             function renderLights() {
                 // (1) directional light
                 let dir_color = 0xFD3B14;
-                let dir_intensity = 1000;
+                let dir_intensity = 5;
                 let dir_light = new THREE.DirectionalLight(dir_color, dir_intensity);
-                dir_light.position.set(0, 3, 0);
+                dir_light.position.set(0, 8, -5);
                 scene.add(dir_light); 
 
                 // (2) create ambient light
-                const amb_color = 0xB1E1FF;
-                const amb_intensity = 1;
+                const amb_color = 0x0D00FC;
+                const amb_intensity = 0.5;
                 const amb_light = new THREE.AmbientLight(amb_color, amb_intensity);
+                amb_light.position.set(0, 8, 5);
                 scene.add(amb_light);
 
                 // (3) hemisphere - basically "blended" light
-                const skyColor = 0xFF000000;  // light blue
+                const skyColor = 0xB1E1FF;  // light blue
                 const groundColor = 0xB97A20;  // brownish orange
-                const hem_intensity = 2;
+                const hem_intensity = 1;
                 const hem_light = new THREE.HemisphereLight(skyColor, groundColor, hem_intensity);
+                hem_light.position.set(0,3,-10);
                 scene.add(hem_light);
             }
 
             // drawCube();
             drawCylinder();
+            drawEggCylinder();
             drawOctahedron();  
             renderLights();
 
-            {
-                const objLoader = new OBJLoader();
-                objLoader.load('https://threejs.org/manual/examples/resources/models/windmill/windmill.obj', (root) => {
-                scene.add(root);
-                });
-            }
+            // {
+            //     const objLoader = new OBJLoader(); // 
+            //     objLoader.load('https://threejs.org/manual/examples/resources/models/windmill/windmill.obj', (root) => {
+            //         scene.add(root);
+            //         root.position.set(0,0,0);
+            //     });
+            // }
         }
 
         main();
     </script>
-<p>The three shapes I have are a cylinder (left), cube (middle), and octahedron (right).</p>
+<p>The three shapes I have are a cylinder, cube (inside the windmill), and octahedron</p>
+<p>Lighting: a red directional light coming from slightly above the cylinder, 
+    a soft blue ambient light from slightly above the octahedron, 
+    and a hemisphere light emanating from below the camera.</p>
 </body>
 
 </html>
