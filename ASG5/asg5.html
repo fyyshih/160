@@ -108,7 +108,7 @@
                 const cube = new THREE.Mesh(geometry, materials);
                 scene.add(cube); // adds non-rotating cube
                 cubes.push(cube);
-                cube.position.set(0, 6, 0);
+                cube.position.set(0, 7.7, 0);
                 // render the scene by calling renderer's render fn + passing in scene and camera
                 // renderer.render(scene, camera); --> call in render()
                 renderer.setSize(500, 250, false);
@@ -227,6 +227,7 @@
         // DRAW EGGS
         function drawEggWhites() {
             // const geometry2 = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
+            
             // (1)
             const geometry1 = new THREE.CylinderGeometry(1, 1, 0.5, 10, 1, false, 0, 2*Math.PI);
             const material1 = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
@@ -277,7 +278,7 @@
 
             // (7)
             const geometry7 = new THREE.CylinderGeometry(1, 1, 0.5, 10, 1, false, 0, 2*Math.PI);
-            const material7 = new THREE.MeshPhongMaterial( { color: 0x1edb0d } );
+            const material7 = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
             const cylinder7 = new THREE.Mesh(geometry7, material7);
 
             scene.add(cylinder7);
@@ -291,24 +292,91 @@
             scene.add(cylinder8);
             cylinder8.position.set(0, 11, 0);
 
+            // (9) mini-egg
+            const geometry9 = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material9 = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
+            const cylinder9 = new THREE.Mesh(geometry9, material1);
+
+            scene.add(cylinder9);
+            cylinder9.position.set(0, 9, 0);
+
+
         }
 
         function drawEggYolks() {
+            // const geometry2 = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
             // (1)
-            const geometry = new THREE.SphereGeometry( 15, 32, 16 ); 
-            const material = new THREE.MeshPhongMaterial( { color: 0xffff00 } ); 
-            const sphere = new THREE.Mesh( geometry, material );
-            scene.add( sphere );
-            sphere.scale.set(5, 5, 5);
-            sphere.position.set(0, 6, 5);
-            console.log('drew egg yolks');
+            const geometry1 = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material1 = new THREE.MeshPhongMaterial( { color: 0xFFD903 } );
+            const cylinder1 = new THREE.Mesh(geometry1, material1);
+            
+            scene.add(cylinder1);
+            cylinder1.position.set(0, 6.2, 0.25); // y += .2, z += .25
+            cylinder1.scale.set(0.5, 0.5, 0.5);
+
             // (2)
+            const geometry2 = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material2 = new THREE.MeshPhongMaterial( { color: 0xFFD903 } );
+            const cylinder2 = new THREE.Mesh(geometry2, material2);
+
+            scene.add(cylinder2);
+            cylinder2.position.set(6, 6.2, 0.25);
+
             // (3)
+            const geometry3 = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material3 = new THREE.MeshPhongMaterial( { color: 0xFFD903 } );
+            const cylinder3 = new THREE.Mesh(geometry3, material3);
+
+            scene.add(cylinder3);
+            cylinder3.position.set(-6, 6.2, 0.25);
+
             // (4)
+            const geometry4 = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material4 = new THREE.MeshPhongMaterial( { color: 0xFFD903 } );
+            const cylinder4 = new THREE.Mesh(geometry4, material4);
+
+            scene.add(cylinder4);
+            cylinder4.position.set(3, 8.7, 2.75);
+
             // (5)
+            const geometry5 = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material5 = new THREE.MeshPhongMaterial( { color: 0xFFD903 } );
+            const cylinder5 = new THREE.Mesh(geometry5, material5);
+
+            scene.add(cylinder5);
+            cylinder5.position.set(-3, 8.7, 2.75);
+
             // (6)
+            const geometry6 = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material6 = new THREE.MeshPhongMaterial( { color: 0xFFD903 } );
+            const cylinder6 = new THREE.Mesh(geometry6, material6);
+
+            scene.add(cylinder6);
+            cylinder6.position.set(-3, 8.7, -2.75);
+
             // (7)
+            const geometry7 = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material7 = new THREE.MeshPhongMaterial( { color: 0xFFD903 } );
+            const cylinder7 = new THREE.Mesh(geometry7, material7);
+
+            scene.add(cylinder7);
+            cylinder7.position.set(3, 8.7, -2.75);
+
             // (8)
+            const geometry8 = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material8 = new THREE.MeshPhongMaterial( { color: 0xFFD903 } );
+            const cylinder8 = new THREE.Mesh(geometry8, material8);
+
+            scene.add(cylinder8);
+            cylinder8.position.set(0, 11.2, 0.25);
+
+            // (9) mini-egg
+            const geometry9 = new THREE.CylinderGeometry(0.25, 0.25, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material9 = new THREE.MeshPhongMaterial( { color: 0xFFD903 } );
+            const cylinder9 = new THREE.Mesh(geometry9, material9);
+
+            scene.add(cylinder9);
+            cylinder9.position.set(-0.05, 9.1, -0.2);
         }
             
         function renderLights() {
@@ -372,12 +440,25 @@
     }
 
     main();
-</script>
-<p>The three shapes I have are a cylinder, cube (inside the windmill), and octahedron</p>
-<p>Lighting: a red directional light coming from slightly above the cylinder, 
-    a soft blue ambient light from slightly above the octahedron, 
-    and a hemisphere light emanating from below the camera.</p>
-<p>Obj: Breakfast by Jarlan Perez [CC-BY] via Poly Pizza</p>
+</script> 
+<h1>Notes to the Grader:</h1>
+<p>Hello! My three shapes are a cylinder, cube, and octahedron. If you can't see them,
+    you may have to zoom out of the scene a little.
+</p>
+<p>Obj: the breakfast table (Breakfast by Jarlan Perez [CC-BY] via Poly Pizza)</p>
+<p>Lighting: two directional lights (yellow and blue) coming from opposite directions.
+        These two lights are very light and are mostly easily observed in the rotating shapes.
+        One ambient light in the color white, to make everything seem lighter.
+</p>
+<p>Skybox: egg on toast</p>
+<p>Controls: top right of screen. You can also zoom in/out using your trackpad and drag the 
+    screen with your mouse/fingers to explore the scene. 
+</p>
+<p>At least 20 primary shapes: there are 9 eggs total, with each egg having 2 shapes
+    (1 for the egg white, 1 for the egg yolk). I also kept my shapes from 5A in so that 
+    it would be easier to observe the effects of the different colored lighting.
+</p>
+
 </body>
 
 </html>
