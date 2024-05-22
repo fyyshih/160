@@ -84,7 +84,6 @@
             const scene = new THREE.Scene();
             scene.background = new THREE.Color("black");
 
-
             // ----------- draw cube -----------
             // creating a BoxGeometry (contains data for a box)
                 const boxWidth = 1;
@@ -205,7 +204,7 @@
                 const detail = 1;
 
 
-                const loader = new THREE.TextureLoader();
+                // const loader = new THREE.TextureLoader();
                 const geometry3 = new THREE.OctahedronGeometry(radius, detail);
                 const material3 = new THREE.MeshPhongMaterial( {color: 0x4D45D9} );
                 const octahedron = new THREE.Mesh(geometry3, material3);
@@ -226,76 +225,128 @@
             }   
 
         // DRAW EGGS
-        function drawEggCylinder() {
-            const radiusTop = 1;
-            const radiusBottom = 1;
-            const height = 0.5;
-            const radialSegments = 10;
-            const heightSegments = 1;
-            const openEnded = false;
-            const thetaStart = 0;
-            const thetaLength = (2 * Math.PI);
+        function drawEggWhites() {
+            // const geometry2 = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
+            // (1)
+            const geometry1 = new THREE.CylinderGeometry(1, 1, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material1 = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
+            const cylinder1 = new THREE.Mesh(geometry1, material1);
 
-            const geometry2 = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
-            const material2 = new THREE.MeshPhongMaterial( { color: 0xFFFFFFFF } );
-            const cylinder = new THREE.Mesh(geometry2, material2);
-            scene.add(cylinder);
-            cylinder.position.set(0, 4, 0);
+            scene.add(cylinder1);
+            cylinder1.position.set(0, 6, 0);
 
-            scene.add(cylinder);
-            cylinder.position.set(0, 6, 0);
+            // (2)
+            const geometry2 = new THREE.CylinderGeometry(1, 1, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material2 = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
+            const cylinder2 = new THREE.Mesh(geometry2, material2);
 
-            const geometry = new THREE.TorusGeometry( 100, 30, 50, 100 ); 
-            const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } ); 
-            const torus = new THREE.Mesh( geometry, material ); scene.add( torus );
-            torus.position.set(0, 6, 0);
+            scene.add(cylinder2);
+            cylinder2.position.set(6, 6, 0);
+
+            // (3)
+            const geometry3 = new THREE.CylinderGeometry(1, 1, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material3 = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
+            const cylinder3 = new THREE.Mesh(geometry3, material3);
+
+            scene.add(cylinder3);
+            cylinder3.position.set(-6, 6, 0);
+
+            // (4)
+            const geometry4 = new THREE.CylinderGeometry(1, 1, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material4 = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
+            const cylinder4 = new THREE.Mesh(geometry4, material4);
+
+            scene.add(cylinder4);
+            cylinder4.position.set(3, 8.5, 2.5);
+
+            // (5)
+            const geometry5 = new THREE.CylinderGeometry(1, 1, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material5 = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
+            const cylinder5 = new THREE.Mesh(geometry5, material4);
+
+            scene.add(cylinder5);
+            cylinder5.position.set(-3, 8.5, 2.5);
+            
+            // (6)
+            // (7)
+            // (8)
+
+        }
+
+        function drawEggYolks() {
+            // (1)
+            const geometry = new THREE.SphereGeometry( 15, 32, 16 ); 
+            const material = new THREE.MeshPhongMaterial( { color: 0xffff00 } ); 
+            const sphere = new THREE.Mesh( geometry, material );
+            scene.add( sphere );
+            sphere.scale.set(5, 5, 5);
+            sphere.position.set(0, 6, 5);
+            console.log('drew egg yolks');
+            // (2)
+            // (3)
+            // (4)
+            // (5)
+            // (6)
+            // (7)
+            // (8)
         }
             
-            function renderLights() {
-                // (1) directional light
-                let dir_color = 0xFD3B14;
-                let dir_intensity = 5;
-                let dir_light = new THREE.DirectionalLight(dir_color, dir_intensity);
-                dir_light.position.set(0, 8, -5);
-                scene.add(dir_light); 
+        function renderLights() {
+            // (1) directional light
+            let dir_color = 0xFFFFFF;
+            let dir_intensity = 1;
+            let dir_light = new THREE.DirectionalLight(dir_color, dir_intensity);
+            dir_light.position.set(0, 0, 0);
+            scene.add(dir_light); 
 
-                // (2) create ambient light
-                const amb_color = 0x0D00FC;
-                const amb_intensity = 0.5;
-                const amb_light = new THREE.AmbientLight(amb_color, amb_intensity);
-                amb_light.position.set(0, 8, 5);
-                scene.add(amb_light);
+            // (2) create ambient light
+            const amb_color = 0x0D00FC;
+            const amb_intensity = 0.5;
+            const amb_light = new THREE.AmbientLight(amb_color, amb_intensity);
+            amb_light.position.set(0, 8, 5);
+            scene.add(amb_light);
 
-                // (3) hemisphere - basically "blended" light
-                const skyColor = 0xB1E1FF;  // light blue
-                const groundColor = 0xB97A20;  // brownish orange
-                const hem_intensity = 1;
-                const hem_light = new THREE.HemisphereLight(skyColor, groundColor, hem_intensity);
-                hem_light.position.set(0,3,-10);
-                scene.add(hem_light);
-            }
-
-            // drawCube();
-            drawCylinder();
-            drawEggCylinder();
-            drawOctahedron();  
-            renderLights();
-
-            // {
-            //     const objLoader = new OBJLoader(); // 
-            //     objLoader.load('https://threejs.org/manual/examples/resources/models/windmill/windmill.obj', (root) => {
-            //         scene.add(root);
-            //         root.position.set(0,0,0);
-            //     });
-            // }
+            // (3) hemisphere - basically "blended" light
+            const skyColor = 0xB1E1FF;  // light blue
+            const groundColor = 0xB97A20;  // brownish orange
+            const hem_intensity = 1;
+            const hem_light = new THREE.HemisphereLight(skyColor, groundColor, hem_intensity);
+            hem_light.position.set(0,3,-10);
+            scene.add(hem_light);
         }
 
-        main();
-    </script>
+        // drawCube();
+        drawEggWhites();
+        drawEggYolks();
+        drawCylinder();
+        drawOctahedron();  
+        renderLights();
+
+        // {
+        //     const objLoader = new OBJLoader(); // 
+        //     objLoader.load('https://threejs.org/manual/examples/resources/models/windmill/windmill.obj', (root) => {
+        //         scene.add(root);
+        //         root.position.set(0,0,0);
+        //     });
+        // }
+
+        // {
+        //     const objLoader = new OBJLoader(); // 
+        //     objLoader.load('./Breakfast/model.obj', (root) => {
+        //         root.scale.set(20, 20, 20);
+        //         scene.add(root);
+        //         // root.position.set(0,0,0);
+        //     });
+        // }
+    }
+
+    main();
+</script>
 <p>The three shapes I have are a cylinder, cube (inside the windmill), and octahedron</p>
 <p>Lighting: a red directional light coming from slightly above the cylinder, 
     a soft blue ambient light from slightly above the octahedron, 
     and a hemisphere light emanating from below the camera.</p>
+<p>Obj: Breakfast by Jarlan Perez [CC-BY] via Poly Pizza</p>
 </body>
 
 </html>
