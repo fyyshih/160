@@ -262,14 +262,34 @@
             // (5)
             const geometry5 = new THREE.CylinderGeometry(1, 1, 0.5, 10, 1, false, 0, 2*Math.PI);
             const material5 = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
-            const cylinder5 = new THREE.Mesh(geometry5, material4);
+            const cylinder5 = new THREE.Mesh(geometry5, material5);
 
             scene.add(cylinder5);
             cylinder5.position.set(-3, 8.5, 2.5);
-            
+
             // (6)
+            const geometry6 = new THREE.CylinderGeometry(1, 1, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material6 = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
+            const cylinder6 = new THREE.Mesh(geometry6, material6);
+
+            scene.add(cylinder6);
+            cylinder6.position.set(-3, 8.5, -2.5);
+
             // (7)
+            const geometry7 = new THREE.CylinderGeometry(1, 1, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material7 = new THREE.MeshPhongMaterial( { color: 0x1edb0d } );
+            const cylinder7 = new THREE.Mesh(geometry7, material7);
+
+            scene.add(cylinder7);
+            cylinder7.position.set(3, 8.5, -2.5);
+
             // (8)
+            const geometry8 = new THREE.CylinderGeometry(1, 1, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const material8 = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
+            const cylinder8 = new THREE.Mesh(geometry8, material8);
+
+            scene.add(cylinder8);
+            cylinder8.position.set(0, 11, 0);
 
         }
 
@@ -292,27 +312,38 @@
         }
             
         function renderLights() {
-            // (1) directional light
-            let dir_color = 0xFFFFFF;
-            let dir_intensity = 1;
+            // (1) directional light - yellow
+            let dir_color = 0xFFF703;
+            let dir_intensity = 50;
             let dir_light = new THREE.DirectionalLight(dir_color, dir_intensity);
-            dir_light.position.set(0, 0, 0);
+            dir_light.position.set(-3, 5, -11);
+            dir_light.target.position.set(0, 0, 0);
             scene.add(dir_light); 
+            scene.add(dir_light.target);
 
             // (2) create ambient light
-            const amb_color = 0x0D00FC;
-            const amb_intensity = 0.5;
+            const amb_color = 0xFFFFFF;
+            const amb_intensity = 2;
             const amb_light = new THREE.AmbientLight(amb_color, amb_intensity);
-            amb_light.position.set(0, 8, 5);
+            amb_light.position.set(0, 6, 5);
             scene.add(amb_light);
 
-            // (3) hemisphere - basically "blended" light
-            const skyColor = 0xB1E1FF;  // light blue
-            const groundColor = 0xB97A20;  // brownish orange
-            const hem_intensity = 1;
-            const hem_light = new THREE.HemisphereLight(skyColor, groundColor, hem_intensity);
-            hem_light.position.set(0,3,-10);
-            scene.add(hem_light);
+            // // (3) hemisphere - basically "blended" light
+            // const skyColor = 0xB1E1FF;  // light blue
+            // const groundColor = 0xB97A20;  // brownish orange
+            // const hem_intensity = 1;
+            // const hem_light = new THREE.HemisphereLight(skyColor, groundColor, hem_intensity);
+            // hem_light.position.set(0,3,-10);
+            // scene.add(hem_light);
+
+            // (3) directional light - blue
+            let dir2_color = 0x0703FF;
+            let dir2_intensity = 50;
+            let dir2_light = new THREE.DirectionalLight(dir2_color, dir2_intensity);
+            dir2_light.position.set(3, 5, -11);
+            dir2_light.target.position.set(0, 0, 0);
+            scene.add(dir2_light); 
+            scene.add(dir2_light.target);
         }
 
         // drawCube();
@@ -330,14 +361,14 @@
         //     });
         // }
 
-        // {
-        //     const objLoader = new OBJLoader(); // 
-        //     objLoader.load('./Breakfast/model.obj', (root) => {
-        //         root.scale.set(20, 20, 20);
-        //         scene.add(root);
-        //         // root.position.set(0,0,0);
-        //     });
-        // }
+        {
+            const objLoader = new OBJLoader(); // 
+            objLoader.load('./Breakfast/model.obj', (root) => {
+                root.scale.set(20, 20, 20);
+                scene.add(root);
+                // root.position.set(0,0,0);
+            });
+        }
     }
 
     main();
