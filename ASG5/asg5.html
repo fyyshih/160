@@ -200,12 +200,7 @@
 
             // ---------- draw octahedron -----------
             function drawOctahedron() {
-                const radius = 1;
-                const detail = 1;
-
-
-                // const loader = new THREE.TextureLoader();
-                const geometry3 = new THREE.OctahedronGeometry(radius, detail);
+                const geometry3 = new THREE.OctahedronGeometry(1, 1); // (radius, detail);
                 const material3 = new THREE.MeshPhongMaterial( {color: 0x4D45D9} );
                 const octahedron = new THREE.Mesh(geometry3, material3);
                 scene.add(octahedron);
@@ -396,14 +391,6 @@
             amb_light.position.set(0, 6, 5);
             scene.add(amb_light);
 
-            // // (3) hemisphere - basically "blended" light
-            // const skyColor = 0xB1E1FF;  // light blue
-            // const groundColor = 0xB97A20;  // brownish orange
-            // const hem_intensity = 1;
-            // const hem_light = new THREE.HemisphereLight(skyColor, groundColor, hem_intensity);
-            // hem_light.position.set(0,3,-10);
-            // scene.add(hem_light);
-
             // (3) directional light - blue
             let dir2_color = 0x0703FF;
             let dir2_intensity = 50;
@@ -421,20 +408,11 @@
         drawOctahedron();  
         renderLights();
 
-        // {
-        //     const objLoader = new OBJLoader(); // 
-        //     objLoader.load('https://threejs.org/manual/examples/resources/models/windmill/windmill.obj', (root) => {
-        //         scene.add(root);
-        //         root.position.set(0,0,0);
-        //     });
-        // }
-
         {
             const objLoader = new OBJLoader(); // 
             objLoader.load('./Breakfast/model.obj', (root) => {
                 root.scale.set(20, 20, 20);
                 scene.add(root);
-                // root.position.set(0,0,0);
             });
         }
     }
