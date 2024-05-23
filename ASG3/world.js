@@ -344,10 +344,14 @@ function updateAnimationAngles() {
 
 // WASD/keyboard controls for camera:
 function keydown(ev) {
-    if (ev.keyCode == 39) {
-        g_eye[0] += 0.2;
-    } else if (ev.keyCode == 37) {
-        g_eye[0] -= 0.2;
+    if (ev.keyCode == 87) { // W
+        moveForward();
+    } else if (ev.keyCode == 65) { // A
+        moveLeft();
+    } else if (ev.keyCode == 83) { // S
+        moveRight();
+    } else if (ev.keyCode == 68) { // D
+        moveBack();
     }
     renderScene();
     console.log(ev.keyCode);

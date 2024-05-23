@@ -40,6 +40,7 @@ class Camera {
 
     */
     moveForward() {
+        console.log("in moveForward()");
         let f = new Vector3();
         f.set(this.at);
         f.sub(this.eye);
@@ -50,6 +51,7 @@ class Camera {
     }
 
     moveBack() {
+        console.log("in moveBack()");
         let b = new Vector3();
         b.set(this.at);
         (this.eye).sub(b);
@@ -61,6 +63,7 @@ class Camera {
 
     moveLeft() {
         // compute forward vector
+        console.log("in moveLeft()");
         let f = new Vector3();
         f.set(this.at);
         f.sub(this.eye);
@@ -84,6 +87,7 @@ class Camera {
     }
 
     moveRight() {
+        console.log("in moveRight");
         // compute forward vector
         let f = new Vector3();
         f.set(this.at);
