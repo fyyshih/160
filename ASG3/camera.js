@@ -1,16 +1,16 @@
 class Camera {
     constructor() {
         this.fov = 60;
-        this.eye = Vector(0, 0, 0);
-        this.at = Vector(0, 0, -1);
-        this.up = Vector(0, 1, 0);
+        this.eye = new Vector3([0, 0, 0]);
+        this.at = new Vector3([0, 0, -1]);
+        this.up = new Vector3([0, 1, 0]);
 
-        this.viewMat = newMatrix4();
+        this.viewMat = new Matrix4();
         this.viewMat.setLookAt(this.eye.elements[0], this.eye.elements[1], this.eye.elements[2], 
                                 this.at.elements[0], this.at.elements[1], this.at.elements[2],
                                 this.up.elements[0], this.up.elements[1], this.up.elements[2]);
 
-        this.projMat = newMatrix4();
+        this.projMat = new Matrix4();
         this.projMat.setLookAt(this.fov, canvas.width/canvas.height, 0.1, 100)
     }
     /*
@@ -72,7 +72,6 @@ class Camera {
 
         // compute side vector
         let s = Vector3.cross(this.up, f);
-        s = f.cross(this.up);
         s.normalize();
         s.mul(0.1);
         this.eye = this.eye.add(s);
@@ -96,8 +95,7 @@ class Camera {
         f.mul(0.1);
 
         // compute side vector
-        let s = Vector3.cross(this.up, f);
-        this.up = f.cross(s);
+        let s = Vector3.cross(f, this.up);
         s.normalize();
         s.mul(0.1);
         this.eye = this.eye.add(s);

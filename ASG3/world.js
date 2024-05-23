@@ -264,6 +264,8 @@ function main() {
     // setting up actions for HTML UI (ex: buttons)
     addActionsForHtmlUI();
 
+    camera = new Camera();
+
     // keyboard fn - WASD
     document.onkeydown = keydown;
 
@@ -345,13 +347,13 @@ function updateAnimationAngles() {
 // WASD/keyboard controls for camera:
 function keydown(ev) {
     if (ev.keyCode == 87) { // W
-        moveForward();
+        camera.moveForward();
     } else if (ev.keyCode == 65) { // A
-        moveLeft();
+        camera.moveLeft();
     } else if (ev.keyCode == 83) { // S
-        moveRight();
+        camera.moveRight();
     } else if (ev.keyCode == 68) { // D
-        moveBack();
+        camera.moveBack();
     }
     renderScene();
     console.log(ev.keyCode);
