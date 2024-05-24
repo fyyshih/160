@@ -49,7 +49,7 @@ let u_GlobalRotateMatrix;
 let u_whichTexture;
 let u_Sampler0;
 let u_Sampler1;
-
+// camera = new Camera();
 
 function setupWebGL() {
     // Retrieve <canvas> element
@@ -264,17 +264,19 @@ function main() {
     // setting up actions for HTML UI (ex: buttons)
     addActionsForHtmlUI();
 
-    camera = new Camera();
-
     // keyboard fn - WASD
     document.onkeydown = keydown;
 
+    camera = new Camera();
+    console.log("updated 1");
     // initialize texture
     initTextures();
 
     // Specify the color for clearing <canvas>
     gl.clearColor(0.4, 0.73, 0.89, 1.0); // from Google color picker
 
+    renderScene();
+    console.log("updated");
     // automatically calls tick
     requestAnimationFrame(tick);
 }
@@ -350,9 +352,9 @@ function keydown(ev) {
         camera.moveForward();
     } else if (ev.keyCode == 65) { // A
         camera.moveLeft();
-    } else if (ev.keyCode == 83) { // S
+    } else if (ev.keyCode == 68) { // S
         camera.moveRight();
-    } else if (ev.keyCode == 68) { // D
+    } else if (ev.keyCode == 83) { // D
         camera.moveBack();
     }
     renderScene();
@@ -375,7 +377,9 @@ function renderScene() {
 
     // pass the view matrix
     var viewMat = new Matrix4();
-    viewMat.setLookAt(g_eye[0],g_eye[1],g_eye[2], g_at[0],g_at[1],g_at[2], g_up[0],g_up[1],g_up[2]); // (eye, at, up)
+    viewMat.setLookAt(camera.eye.elements[0], camera.eye.elements[1], camera.eye.elements[2], 
+        camera.at.elements[0],camera.at.elements[1],camera.at.elements[2], 
+        camera.up.elements[0],camera.up.elements[1],camera.up.elements[2]); // (eye, at, up)
     gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
 
     // pass the matrix to u_ModelMatrix attribute
