@@ -157,6 +157,7 @@ let g_baseNeckAngle = 0;
 let g_upperNeckAngle = 0;
 let g_headAngle = 45;
 let g_beakAngle = 0;
+let g_wallAnimation = false;
 
 // variables for mouseDrag rotation + animation (shift+click)
 let g_prevX = 0;
@@ -174,6 +175,8 @@ let mouseDrag = false;
 
 function addActionsForHtmlUI() {
     // button events: animation on/off (both neck joints + head)
+    document.getElementById('animationWallOnButton').onclick = function() {g_wallAnimation = true;};
+    document.getElementById('animationWallOffButton').onclick = function() {g_wallAnimation = false;};
     document.getElementById('animationBaseNeckOnButton').onclick = function() {g_baseNeckAnimation = true;};
     document.getElementById('animationBaseNeckOffButton').onclick = function() {g_baseNeckAnimation = false;};
     document.getElementById('animationUpperNeckOnButton').onclick = function() {g_upperNeckAnimation = true;};
@@ -236,7 +239,7 @@ function initTextures() { // loads, sends to texture
     image0.onload = function(){ sendImageToTexture(u_Sampler0, image0, 0); };
     image1.onload = function(){ sendImageToTexture(u_Sampler1, image1, 1); };
     image0.src = "burp.jpg";
-    image1.src = "aerial.png";
+    image1.src = "/libs/squiggle.png";
   
     return true;
 }
@@ -287,13 +290,11 @@ function main() {
     document.onkeydown = keydown;
 
     camera = new Camera();
-    console.log("updated 1");
     // initialize texture
     initTextures();
 
     // Specify the color for clearing <canvas>
     gl.clearColor(0.4, 0.73, 0.89, 1.0); // from Google color picker
-    drawMap();
     renderScene();
     console.log("updated");
     // automatically calls tick
@@ -392,31 +393,59 @@ var g_eye = [0,0,3];
 var g_at = [0,3,-100];
 var g_up = [0,1,0];
 
+// let mapChanged = true;
+
 var g_map = [
-    [1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
 console.log(g_map);
 
 function drawMap() {
     console.log("in drawMap()");
-    for (x = 0; x < 8; x++) {
-        for (y = 0; y < 8; y++) {
+    for (x = 0; x < 32; x++) {
+        for (y = 0; y < 32; y++) {
             if (g_map[x][y] == 1) {
                 var body = new Cube();
                 body.color = [1.0, 1.0, 1.0, 1.0];
-                body.matrix.translate(x-4, -0.75, y-4);
+                body.matrix.translate(x, -0.8, -y);
+                body.matrix.scale(1, 1, 1);
                 body.render();
                 console.log("jsut rendered wall");
             }
         }
     }
+    // mapChanged = false;
 }
 function renderScene() {
 
@@ -448,17 +477,16 @@ function renderScene() {
     var floor = new Cube();
     floor.color = [1.0,0.0,0.0,1.0];
     floor.textureNum = 0;
-    floor.matrix.translate(-5.0, -0.86, 5.0);
-    floor.matrix.scale(10, 0, 10);
-    //floor.matrix.translate(-0.5, 0, -0.5);
+    floor.matrix.translate(-1, -0.8, 1);
+    floor.matrix.scale(3, 0, 3);
     floor.render();
 
     // draw SKY
     var sky = new Cube();
     sky.color = [1.0, 0.0, 0.0, 1.0];
-    sky.textureNum = 3;
+    sky.textureNum = 1;
     sky.matrix.translate(-5.0, -0.88, 5.0); // (1, -0.5, 2);
-    sky.matrix.scale(50, 50, 50);
+    sky.matrix.scale(32, 32, 32);
     sky.render();
     
     // draw body
@@ -507,7 +535,6 @@ function renderScene() {
     // draw left foot 
     var leftFoot = new Cube();
     leftFoot.color = [0.9294, 0.4588, 0.0471, 1];
-    leftFoot.textureNum = 0;
     leftFoot.matrix.translate(.4, -.8, -.25);
     leftFoot.matrix.rotate(0, 1, 0, 0);
     leftFoot.matrix.scale(-.25, -.05, .1);
@@ -516,7 +543,6 @@ function renderScene() {
     // draw right foot 
     var rightFoot = new Cube();
     rightFoot.color = [0.9294, 0.4588, 0.0471, 1]; // periwinkle: [0.5, 0.5, 1, 1];
-    rightFoot.textureNum = 0;
     rightFoot.matrix.translate(.4, -.8, -.1);
     rightFoot.matrix.rotate(0, 1, 0, 0);
     rightFoot.matrix.scale(-.25, -.05, .1);
@@ -577,8 +603,12 @@ function renderScene() {
     lowerBeak.matrix.translate(0, -1.9, 0);
     lowerBeak.matrix.rotate(0, 0, 0, 1);
     lowerBeak.render();
-    
 
+
+    if (g_wallAnimation) {
+        drawMap();
+    }
+    
     var duration = performance.now() - startTime;
     sendTextToHTML(" ms: " + Math.floor(duration) + " fps: " + Math.floor(10000/duration)/10, "numdot");
 }
