@@ -21,6 +21,7 @@ var FSHADER_SOURCE = `
     uniform vec4 u_FragColor;
     uniform sampler2D u_Sampler0;
     uniform sampler2D u_Sampler1;
+    uniform sampler2D u_Sampler2;
     uniform int u_whichTexture;
     void main() {
         if (u_whichTexture == -2) {
@@ -31,6 +32,8 @@ var FSHADER_SOURCE = `
             gl_FragColor = texture2D(u_Sampler0, v_UV);         // Use texture0
         } else if (u_whichTexture == 1) {
             gl_FragColor = texture2D(u_Sampler1, v_UV);         // Use texture1
+        // } else  if (u_whichTexture == 2) {
+        //     gl_FragColor = texture2D(u_Sampler2, v_UV);
         } else {
             gl_FragColor = vec4(0.0, 0.6, 1, 1);                // Error
         }
@@ -49,6 +52,7 @@ let u_GlobalRotateMatrix;
 let u_whichTexture;
 let u_Sampler0;
 let u_Sampler1;
+// let u_Sampler2;
 // camera = new Camera();
 
 function setupWebGL() {
@@ -132,6 +136,12 @@ function connectVariablesToGLSL() {
         console.log('Failed to get the storage location of u_Sampler1');
         return;
     }
+
+    // u_Sampler2 = gl.getUniformLocation(gl.program, 'u_Sampler2');
+    // if (!u_Sampler2) {
+    //     console.log('Failed to get the storage location of u_Sampler2');
+    //     return;
+    // }
 
     u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
     if (!u_whichTexture) {
@@ -238,8 +248,10 @@ function initTextures() { // loads, sends to texture
     // Register the event handler to be called on loading an image
     image0.onload = function(){ sendImageToTexture(u_Sampler0, image0, 0); };
     image1.onload = function(){ sendImageToTexture(u_Sampler1, image1, 1); };
+    // image2.onload = function(){ sendImageToTexture(u_Sampler2, image2, 2); };
     image0.src = "burp.jpg";
     image1.src = "/libs/squiggle.png";
+   //  image2.src = "/libs/cobblestone.png";
   
     return true;
 }
