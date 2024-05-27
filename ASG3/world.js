@@ -250,7 +250,7 @@ function initTextures() { // loads, sends to texture
     image1.onload = function(){ sendImageToTexture(u_Sampler1, image1, 1); };
     // image2.onload = function(){ sendImageToTexture(u_Sampler2, image2, 2); };
     image0.src = "burp.jpg";
-    image1.src = "/libs/squiggle.png";
+    image1.src = "squiggle.png";
    //  image2.src = "/libs/cobblestone.png";
   
     return true;
