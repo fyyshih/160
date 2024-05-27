@@ -32,7 +32,7 @@ var FSHADER_SOURCE = `
         } else if (u_whichTexture == 1) {
             gl_FragColor = texture2D(u_Sampler1, v_UV);         // Use texture1
         } else {
-            gl_FragColor = vec4(1, 0.2, 0.2, 1);                // Error
+            gl_FragColor = vec4(0.0, 0.6, 1, 1);                // Error
         }
     }`
 
@@ -163,8 +163,14 @@ let g_prevX = 0;
 let g_prevY = 0;
 let g_nX = 0;
 let g_nY = 0;
-let mouseDrag = false;
 let g_beakAnimation = false;
+
+
+let startX = 0; // prev
+let startY = 0;
+let endX; 
+let endY;
+let mouseDrag = false;
 
 function addActionsForHtmlUI() {
     // button events: animation on/off (both neck joints + head)
@@ -188,17 +194,30 @@ function addActionsForHtmlUI() {
     canvas.onmousedown = function(e) { 
         // console.log('in onmousedown in main()');
         mouseDrag = true;
-        let [x, y] = convertCoordinatesEventToGL(e);
-        g_prevX = x;
-        g_prevY = y;
-        if (e.shiftKey) {
-            // console.log('SHIFT CLICK DETECTED');
-            g_beakAnimation = !g_beakAnimation; // allows for toggling between on/off (vs. just g_beakAnimation = true;)
-        }
+        [startX, startY] = convertCoordinatesEventToGL(e);
     };
 
-    canvas.onmousemove = function(ev) { if(ev.buttons == 1) {click(ev)} }; // will rotat
-    // console.log('just after onmousemove');   
+    // canvas.onmousemove = function(ev) { if(ev.buttons == 1) {click(ev)} }; // will rotat
+    // // console.log('just after onmousemove');  
+    
+    canvas.onmouseup = function(ev) {
+        mouseDrag = false;
+        // // Reset dragging state
+        // startX = 0;
+        // startY = 0;
+    };
+
+    canvas.onmousemove = function(ev) {
+        if (!mouseDrag) {
+            return;
+        }
+        let [currX, currY] = convertCoordinatesEventToGL(ev);
+        cameraPan(startX, startY, currX, currY);
+    
+        // Update the previous coordinates for the next movement
+        startX = currX;
+        startY = currY;
+    };
 }
 
 // from Matsuda -- TexturedQuad.js (initTextures() and loadTexture())
@@ -274,32 +293,34 @@ function main() {
 
     // Specify the color for clearing <canvas>
     gl.clearColor(0.4, 0.73, 0.89, 1.0); // from Google color picker
-
+    drawMap();
     renderScene();
     console.log("updated");
     // automatically calls tick
     requestAnimationFrame(tick);
 }
 
-function click(ev) {
-    // console.log("in click");
-    let [x, y] = convertCoordinatesEventToGL(ev);
-    if (mouseDrag) {
-        var currX = 360 * (x - g_prevX) * -1; // (* -1) to prevent mirroring
-        var currY = 360 * (y - g_prevY);
+function cameraPan(startX, startY, endX, endY) {
+    var currX = 360 * (endX - startX) * -1; // (* -1) to prevent mirroring
+    var currY = 360 * (endY - startY);
 
-        g_nX += currY;
-        g_nY += currX;
+    // Get Difference (drag length)
+    let xDiff = (currX - startX) * 0.1;
+    let panX = xDiff * 0.1;
 
-        // set to 0 if > 360
-        if (Math.abs(g_globalAngle / 360) > 1) {
-            g_nX = 0;
-        }
+    let yDiff = (currY - startY) * 0.1;
+    let panY = yDiff * 0.1;
+
+    if (xDiff < 0) {
+        camera.panLeft(panX);
+    } else if (xDiff > 0) {
+        camera.panRight(panX);
     }
-    g_prevX = x;
-    g_prevY = y;
-    // console.log('x, y is ', x, y);
-    // console.log('lastX, lastY is ', g_lastX, g_lastY);
+    if (yDiff < 0) {
+        camera.panUp(panY);
+    } else if (yDiff > 0) {
+        camera.panDown(panY);
+    }
 }
 
 function convertCoordinatesEventToGL(ev) {
@@ -356,6 +377,10 @@ function keydown(ev) {
         camera.moveRight();
     } else if (ev.keyCode == 83) { // D
         camera.moveBack();
+    } else if (ev.keyCode == 81) { // Q - pan left
+        camera.panLeft();
+    } else if (ev.keyCode == 69) { // E - pan right
+        camera.panRight();
     }
     renderScene();
     console.log(ev.keyCode);
@@ -366,6 +391,33 @@ function keydown(ev) {
 var g_eye = [0,0,3];
 var g_at = [0,3,-100];
 var g_up = [0,1,0];
+
+var g_map = [
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 1, 1, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1],
+];
+console.log(g_map);
+
+function drawMap() {
+    console.log("in drawMap()");
+    for (x = 0; x < 8; x++) {
+        for (y = 0; y < 8; y++) {
+            if (g_map[x][y] == 1) {
+                var body = new Cube();
+                body.color = [1.0, 1.0, 1.0, 1.0];
+                body.matrix.translate(x-4, -0.75, y-4);
+                body.render();
+                console.log("jsut rendered wall");
+            }
+        }
+    }
+}
 function renderScene() {
 
     var startTime = performance.now();
@@ -404,7 +456,7 @@ function renderScene() {
     // draw SKY
     var sky = new Cube();
     sky.color = [1.0, 0.0, 0.0, 1.0];
-    sky.textureNum = 1;
+    sky.textureNum = 3;
     sky.matrix.translate(-5.0, -0.88, 5.0); // (1, -0.5, 2);
     sky.matrix.scale(50, 50, 50);
     sky.render();

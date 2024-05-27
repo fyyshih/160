@@ -15,28 +15,21 @@ class Camera {
     }
 
     moveForward() {
-        // console.log("in moveForward()");
         var f = new Vector3();
-        console.log("after initializing f");
         f.set(this.at);
         f.sub(this.eye);
         f.normalize();
-        console.log(f.elements);
-        // f.mul(0.1); // FIXME: change speed
+        f.mul(0.1);
         this.eye = this.eye.add(f);
         this.at = this.at.add(f);
-        console.log("printing eye and at 2");
-        console.log(this.eye.elements);
-        console.log(this.at.elements);
     }
 
     moveBack() {
-         //console.log("in moveBack()");
         var b = new Vector3();
         b.set(this.at);
         b.sub(this.eye);
         b.normalize();
-        // b.mul(2000);
+        b.mul(0.1);
         this.eye = this.eye.sub(b);
         this.at = this.at.sub(b);
     }
@@ -48,7 +41,6 @@ class Camera {
         f.set(this.at);
         f.sub(this.eye);
         f.normalize();
-        // f.mul(2);
 
         // compute side vector
         let s = Vector3.cross(this.up, f);
@@ -56,13 +48,6 @@ class Camera {
         s.mul(0.1);
         this.eye = this.eye.add(s);
         this.at = this.at.add(s);
-        /*
-        f = f.divide(f.length());
-        s = f.cross(this.up);
-        s = s.divide(s.length());
-        this.at = this.at.add(s);
-        this.eye = this.eye.add(s);
-        */
     }
 
     moveRight() {
@@ -72,7 +57,6 @@ class Camera {
         f.set(this.at);
         f.sub(this.eye);
         f.normalize();
-        // f.mul(0.1);
 
         // compute side vector
         let s = Vector3.cross(f, this.up);
@@ -83,6 +67,7 @@ class Camera {
     }
 
     panLeft() {
+        console.log("in panLeft");
         // compute forward vector
         let f = new Vector3();
         f.set(this.at);
@@ -90,7 +75,7 @@ class Camera {
         f.normalize();
 
         // rotate the vector f by alpha degrees around the up vector
-        let rotMat = new Matrix4().rotate(alpha, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
+        let rotMat = new Matrix4().rotate(1, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
         // TODO: change alpha              ^^
 
         // multiply rotation matrix rotMat by forward vector f:
@@ -102,6 +87,7 @@ class Camera {
     }
 
     panRight() {
+        console.log("in panRight");
         // compute forward vector
         let f = new Vector3();
         f.set(this.at);
@@ -109,13 +95,55 @@ class Camera {
         f.normalize();
 
         // rotate the vector f by alpha degrees around the up vector
-        let rotMat = new Matrix4().rotate(-alpha, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
+        let rotMat = new Matrix4().rotate(-1, this.up.elements[0], this.up.elements[1], this.up.elements[2]);
         // TODO: change alpha               ^^
 
         // multiply rotation matrix rotMat by forward vector f:
         let f_prime = rotMat.multiplyVector3(f);
 
         // update "at" vector to be : at = eye + f_prime
+        this.at.set(this.eye);
+        this.at.add(f_prime);
+    }
+
+    panUp() {
+        console.log("in panUp");
+        // compute forward vector
+        let f = new Vector3();
+        f.set(this.at);
+        f.sub(this.eye);
+        f.normalize();
+
+        // cross prod for vertical pan
+        let y = Vector3.cross(f, this.up);
+        y.normalize();
+
+        // rotate the vector f by 1 degree
+        let rotMat = new Matrix4().rotate(0.5, y.elements[0], y.elements[1], y.elements[2]);
+        let f_prime = rotMat.multiplyVector3(f);
+
+        // update vectors
+        this.at.set(this.eye);
+        this.at.add(f_prime);
+    }
+
+    panDown() {
+        console.log("in panDown");
+        // compute forward vector
+        let f = new Vector3();
+        f.set(this.at);
+        f.sub(this.eye);
+        f.normalize();
+
+        // cross prod for vertical pan
+        let y = Vector3.cross(f, this.up);
+        y.normalize();
+
+        // rotate vector f by 1 degree
+        let rotMat = new Matrix4().rotate(-0.5, y.elements[0], y.elements[1], y.elements[2]);
+        let f_prime = rotMat.multiplyVector3(f);
+
+        // update vectors
         this.at.set(this.eye);
         this.at.add(f_prime);
     }
