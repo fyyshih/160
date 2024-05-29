@@ -20,38 +20,33 @@ class Cube {
         gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
 
         //gl.uniform4f(u_FragColor, 1, 1, 1, 1); // should be white
+       
         // front face
-        drawTriangle3DUV([0,0,0, 1,1,0, 1,0,0], [0,0, 1,1, 0,1]);
-        drawTriangle3DUV([0,0,0, 0,1,0, 1,1,0], [0,0, 1,0, 1,1]);
-        // drawTriangle3DUV([0,0,0, 1,1,0, 1,0,0],  [0,0, 1,1, 0,1]);// , [0,0, 1,0, 1,1]);
-        // drawTriangle3DUV([0,0,0, 0,1,0, 1,1,0], [0,0, 1,1, 1,0]); 
+        drawTriangle3DUVNormal(
+            [0, 0, 0, 1,1,0, 1,0,0],
+            [0,0, 1,1, 1,0],
+            [0,0,-1, 0,0,-1, 0,0,-1]);
+        drawTriangle3DUVNormal([0,0,0, 0,1,0, 1,1,0], [0,0, 1,0, 1,1], [0,0,-1, 0,0,-1, 0,0,-1]);
 
         // top face
-        drawTriangle3DUV([0,1,0, 1,1,-1, 1,1,0], [0,0, 1,1, 0,1]);
-        drawTriangle3DUV([0,1,0, 0,1,-1, 1,1,-1], [0,0, 1,0, 1,1]);
+        drawTriangle3DUVNormal([0,1,0, 1,1,-1, 1,1,0], [0,0, 1,1, 0,1], [0,1,0, 0,1,0, 0,1,0]);
+        drawTriangle3DUVNormal([0,1,0, 0,1,-1, 1,1,-1], [0,0, 1,0, 1,1], [0,1,0, 0,1,0, 0,1,0]);
 
         // bottom face
-        drawTriangle3DUV([0,0,0, 1,0,-1, 1,0,0], [0,0, 1,1, 0,1]);
-        drawTriangle3DUV([0,0,0, 0,0,-1, 1,0,-1], [0,0, 1,0, 1,1]);
+        drawTriangle3DUVNormal([0,0,0, 1,0,-1, 1,0,0], [0,0, 1,1, 0,1], [0,-1,0, 0,-1,0, 0,-1,0]);
+        drawTriangle3DUVNormal([0,0,0, 0,0,-1, 1,0,-1], [0,0, 1,0, 1,1], [0,-1,0, 0,-1,0, 0,-1,0]);
 
         // back face
-        // drawTriangle3DUV([0,0,-1, 1,1,-1, 1,0,-1], [0,0, 1,0, 0,1]);
-        // drawTriangle3DUV([0,0,-1, 0,1,-1, 1,1,-1], [0,0, 1,1, 1,0]);
-        drawTriangle3DUV([0,0,-1, 1,1,-1, 1,0,-1], [0,0, 1,1, 0,1]);
-        drawTriangle3DUV([0,0,-1, 0,1,-1, 1,1,-1], [0,0, 1,0, 1,1]);
-        // drawTriangle3D([0,0,-1, 1,1,-1, 1,0,-1]);
-        // drawTriangle3D([0,0,-1, 0,1,-1, 1,1,-1]);
+        drawTriangle3DUVNormal([0,0,-1, 1,1,-1, 1,0,-1], [0,0, 1,1, 0,1], [0,0,1, 0,0,1, 0,0,1]);
+        drawTriangle3DUVNormal([0,0,-1, 0,1,-1, 1,1,-1], [0,0, 1,0, 1,1], [0,0,1, 0,0,1, 0,0,1]);
 
         // left face
-        drawTriangle3DUV([0,0,0, 0,1,-1, 0,0,-1], [0,0, 1,1, 0,1]);
-        drawTriangle3DUV([0,0,0, 0,1,0, 0,1,-1], [0,0, 1,0, 1,1]);
-        // drawTriangle3D([0,0,0, 0,1,-1, 0,0,-1]);
-        // drawTriangle3D([0,0,0, 0,1,0, 0,1,-1]);
+        drawTriangle3DUVNormal([0,0,0, 0,1,-1, 0,0,-1], [0,0, 1,1, 0,1], [-1,0,0 -1,0,0, -1,0,0]);
+        drawTriangle3DUVNormal([0,0,0, 0,1,0, 0,1,-1], [0,0, 1,0, 1,1], [-1,0,0, -1,0,0, -1,0,0]);
 
         // right face
-        drawTriangle3DUV([1,0,0, 1,1,-1, 1,0,-1], [0,0, 1,1, 0,1]);
-        drawTriangle3DUV([1,0,0, 1,1,0, 1,1,-1], [0,0, 1,0, 1,1]);
-        // drawTriangle3DUV([1,0,0, 1,1,-1, 1,0,-1], [1,0, 1,1, 1,0]);
+        drawTriangle3DUVNormal([1,0,0, 1,1,-1, 1,0,-1], [0,0, 1,1, 0,1], [1,0,0, 1,0,0, 1,0,0]);
+        drawTriangle3DUVNormal([1,0,0, 1,1,0, 1,1,-1], [0,0, 1,0, 1,1], [1,0,0, 1,0,0, 1,0,0]);
 
     }
 }
