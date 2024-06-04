@@ -67,8 +67,11 @@ class Triangle {
 
 
   function drawTriangle3DUV(vertices, uv) {
+
+    gl.disableVertexAttribArray(a_Normal);
+
     // set num vertices:
-    var n = 3; // FIXME: should be set to vertices/3
+    var n = vertices.length/3; // FIXME: should be set to vertices/3
 
     // ---------- create buffer obj for positions ----------
     var vertexBuffer = gl.createBuffer();
@@ -118,7 +121,7 @@ class Triangle {
   function drawTriangle3DUVNormal(vertices, uv, normals) {
     // set num vertices:
     var n = vertices.length/3; // the number of vertices
-
+  
     // ---------- create buffer obj for positions ----------
     var vertexBuffer = gl.createBuffer();
     if (!vertexBuffer) {
@@ -157,10 +160,6 @@ class Triangle {
     // enab assignment to a_Position var
     gl.enableVertexAttribArray(a_UV);
 
-    // draw the triangle !!
-
-    gl.drawArrays(gl.TRIANGLES, 0, n);
-
     // ----------- create buffer obj for Normals ---------
     var normalBuffer = gl.createBuffer();
     if (!normalBuffer) {
@@ -171,16 +170,21 @@ class Triangle {
     // bind the buffer obj to target
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
 
+    // enable the assignment to a_Position variable
+    gl.enableVertexAttribArray(a_Normal);
+  
     // write date into buffer obj
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.DYNAMIC_DRAW);
 
     // assign the buffer obj to a_Position variable
     gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
 
-    // enable the assignment to a_Position variable
-    gl.enableVertexAttribArray(a_Normal);
+
+
 
     // ------------- draw the triangle -----------------
     gl.drawArrays(gl.TRIANGLES, 0, n);
+
+    gl.disableVertexAttribArray(a_Normal);
     g_vertexBuffer = null;
   }

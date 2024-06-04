@@ -28,8 +28,10 @@ var FSHADER_SOURCE = `
     uniform sampler2D u_Sampler2;
     uniform int u_whichTexture;
     void main() {
-        if (u_whichTexture == -2) {
+        if (u_whichTexture == -3) {
             gl_FragColor = vec4((v_Normal+1.0)/2.0, 1.0);                         // Use color
+        } else if (u_whichTexture == -2) {
+            gl_FragColor = u_FragColor;
         } else if (u_whichTexture == -1) {
             gl_FragColor = vec4(v_UV, 1.0, 1.0);                // Use UV debug
         } else if (u_whichTexture == 0) {
@@ -39,7 +41,7 @@ var FSHADER_SOURCE = `
         // } else  if (u_whichTexture == 2) {
         //     gl_FragColor = texture2D(u_Sampler2, v_UV);
         } else {
-            gl_FragColor = vec4(0.0, 0.6, 1, 1);                // Error, pastel blue
+            gl_FragColor = vec4(1, 0.2, 0.2, 1);                // Error, red
         }
     }`
 
@@ -48,7 +50,9 @@ let canvas;
 let gl;
 let a_Position;
 let a_UV;
+let a_Normal;
 let u_FragColor;
+let u_Size;
 let u_ModelMatrix;
 let u_ProjectionMatrix;
 let u_ViewMatrix;
@@ -135,6 +139,12 @@ function connectVariablesToGLSL() {
         return;
     }    
 
+    u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
+    if (!u_whichTexture) {
+        console.log('Failed to get the storage location of u_whichTexture');
+        return;
+    }
+
     // // Get the storage location of u_Sampler
     u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
     if (!u_Sampler0) {
@@ -148,24 +158,41 @@ function connectVariablesToGLSL() {
         return;
     }
 
-    // u_Sampler2 = gl.getUniformLocation(gl.program, 'u_Sampler2');
-    // if (!u_Sampler2) {
-    //     console.log('Failed to get the storage location of u_Sampler2');
-    //     return;
-    // }
-
-    u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
-    if (!u_whichTexture) {
-        console.log('Failed to get the storage location of u_whichTexture');
-        return;
-    }
-
     // set initial vlue of matrix to identity matrix
     var identityM = new Matrix4();
     gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
     gl.uniformMatrix4fv(u_ViewMatrix, false, identityM.elements);
     gl.uniformMatrix4fv(u_ProjectionMatrix, false, identityM.elements);
     gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, identityM.elements);
+}
+
+var vertices = new Float32Array([
+    // CHANGE COORDINATES LATER !!!! JUST TESTING RN
+    -0.5, 0.5, 0.0,
+    -0.5, -0.5, 0.0,
+    0.5, 0.5, 0.0,
+    0.5, -0.5, 0.0,
+]);
+
+function initVertexBuffer(gl, vertices) {
+    // create a buffer obj
+    var vertexBuffer = gl.createBuffer();
+    if (!vertexBuffer) {
+        console.log("Failed to create the buffer object");
+        return -1;
+    }
+    console.log("created the buffero obj");
+
+    // bind the buffer object to target
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+
+    // write data into the buffer object
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+    // get the number of vertices
+    var n = vertices.length/3
+
+    return n;
 }
 
 // UI global elements
@@ -193,9 +220,12 @@ let startY = 0;
 let endX; 
 let endY;
 let mouseDrag = false;
+let g_normalOn = false;
 
 function addActionsForHtmlUI() {
     // button events: animation on/off (both neck joints + head)
+    document.getElementById('normalOn').onclick = function() {g_normalOn = true; console.log('normalOn-->', g_normalOn);};
+    document.getElementById('normalOff').onclick = function() {g_normalOn = false; console.log('normalOff-->', g_normalOn);};
     document.getElementById('animationWallOnButton').onclick = function() {g_wallAnimation = true;};
     document.getElementById('animationWallOffButton').onclick = function() {g_wallAnimation = false;};
     document.getElementById('animationBaseNeckOnButton').onclick = function() {g_baseNeckAnimation = true;};
@@ -306,6 +336,12 @@ function main() {
     // set up GLSL shader programs + connect GLSL variables
     connectVariablesToGLSL();
 
+    var n = initVertexBuffer(gl, vertices);
+    if (n < 0) {
+        console.log("Failed to set the positions of the vertices");
+        return;
+    }
+    
     // setting up actions for HTML UI (ex: buttons)
     addActionsForHtmlUI();
 
@@ -496,10 +532,17 @@ function renderScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     // gl.clear(gl.COLOR_BUFFER_BIT);
 
+
+    // test sphere
+    var test = new Sphere();
+    test.color = [0.75, 0.5, 0.5];
+    test.matrix.translate(0, .5, -0.75);
+    test.matrix.scale(0.45, 0.45, 0.45);
+    test.render();
     // draw FLOOR
     var floor = new Cube();
     floor.color = [1.0,0.0,0.0,1.0];
-    //floor.textureNum = 0;
+    floor.textureNum = 0;
     floor.matrix.translate(-5.0, -0.88, 5.0);
     floor.matrix.scale(32, 32, 32);
     floor.render();
@@ -507,11 +550,18 @@ function renderScene() {
     // draw SKY
     var sky = new Cube();
     sky.color = [1.0, 0.0, 0.0, 1.0];
-    sky.textureNum = 3;
+    if (g_normalOn == true) {
+        sky.textureNum = -1;
+        console.log('normal on, ', sky.textureNum);
+    } else {
+        sky.textureNum = 0;
+        console.log('normal OFF, ', sky.textureNum);
+    }
     sky.matrix.translate(-5.0, -0.88, 5.0); // (1, -0.5, 2);
-    sky.matrix.scale(32, 32, 32);
+    sky.matrix.scale(-32, -32, -32);
     sky.render();
     
+    /*
     // draw body
     var body = new Cube();
     body.color = [0.8196, 0.4980, 0.1725, 1.0];
@@ -626,7 +676,7 @@ function renderScene() {
     lowerBeak.matrix.translate(0, -1.9, 0);
     lowerBeak.matrix.rotate(0, 0, 0, 1);
     lowerBeak.render();
-
+    */
 
     if (g_wallAnimation) {
         drawMap();
