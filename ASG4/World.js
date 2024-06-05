@@ -7,6 +7,7 @@ var VSHADER_SOURCE = `
     attribute vec3 a_Normal;
     varying vec2 v_UV;
     varying vec3 v_Normal;
+    varying vec4 v_VertPos;
     uniform mat4 u_ModelMatrix;
     uniform mat4 u_GlobalRotateMatrix;
     uniform mat4 u_ViewMatrix;
@@ -15,6 +16,7 @@ var VSHADER_SOURCE = `
         gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
         v_UV = a_UV;
         v_Normal = a_Normal;
+        v_VertPos = u_ModelMatrix * a_Position;
     }`
 
 // Fragment shader program
@@ -22,11 +24,13 @@ var FSHADER_SOURCE = `
     precision mediump float;
     varying vec2 v_UV;
     varying vec3 v_Normal;
+    uniform vec3 u_lightPos;
     uniform vec4 u_FragColor;
     uniform sampler2D u_Sampler0;
     uniform sampler2D u_Sampler1;
     uniform sampler2D u_Sampler2;
     uniform int u_whichTexture;
+    varying vec4 v_VertPos;
     void main() {
         if (u_whichTexture == -3) {
             gl_FragColor = vec4((v_Normal+1.0)/2.0, 1.0);                         // Use color
@@ -42,6 +46,14 @@ var FSHADER_SOURCE = `
         //     gl_FragColor = texture2D(u_Sampler2, v_UV);
         } else {
             gl_FragColor = vec4(1, 0.2, 0.2, 1);                // Error, red
+        }
+
+        vec3 lightVector = vec3(v_VertPos)-u_lightPos;
+        float r = length(lightVector);
+        if (r < 1.0) {
+            gl_FragColor = vec4(1, 0, 0, 1);
+        } else if (r < 2.0) {
+            gl_FragColor = vec4(0, 1, 0, 1);
         }
     }`
 
@@ -60,6 +72,7 @@ let u_GlobalRotateMatrix;
 let u_whichTexture;
 let u_Sampler0;
 let u_Sampler1;
+let u_lightPos;
 // let u_Sampler2;
 // camera = new Camera();
 
@@ -158,6 +171,12 @@ function connectVariablesToGLSL() {
         return;
     }
 
+    u_lightPos = gl.getUniformLocation(gl.program, 'u_lightPos');
+    if(!u_lightPos) {
+      console.log('Failed to get the storage location of u_lightPos');
+      return false;
+    }
+
     // set initial vlue of matrix to identity matrix
     var identityM = new Matrix4();
     gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
@@ -222,6 +241,13 @@ let endY;
 let mouseDrag = false;
 let g_normalOn = false;
 
+
+let g_yellowAngle = 0;
+let g_yellowAnimation = false;
+let g_magentaAngle = 0;
+let g_magentaAnimation = false;
+let g_lightPos = [0, 1, -2];
+
 function addActionsForHtmlUI() {
     // button events: animation on/off (both neck joints + head)
     document.getElementById('normalOn').onclick = function() {g_normalOn = true; console.log('normalOn-->', g_normalOn);};
@@ -236,6 +262,12 @@ function addActionsForHtmlUI() {
     document.getElementById('animationHeadOffButton').onclick = function() {g_headAnimation = false;};
 
 
+    // color slider events:
+    document.getElementById('yellowSlide').addEventListener('mousemove', function(ev) {if(ev.buttons == 1) {g_yellowAngle = this.value; renderScene();}});
+    document.getElementById('magentaSlide').addEventListener('mousemove', function(ev) {if(ev.buttons == 1) {g_magentaAngle = this.value; renderScene();}});
+    document.getElementById('lightSlideX').addEventListener('mousemove', function(ev) {if(ev.buttons == 1) {g_lightPos[0] = this.value/100; renderScene();}});
+    document.getElementById('lightSlideY').addEventListener('mousemove', function(ev) {if(ev.buttons == 1) {g_lightPos[1] = this.value/100; renderScene();}});
+    document.getElementById('lightSlideZ').addEventListener('mousemove', function(ev) {if(ev.buttons == 1) {g_lightPos[2] = this.value/100; renderScene();}});
     // slider events: head + neck angle (both joints). "input" instead of "mousemove".
     document.getElementById('baseNeckSlide').addEventListener('input', function() { g_baseNeckAngle = this.value; renderScene(); });
     document.getElementById('upperNeckSlide').addEventListener('input', function() { g_upperNeckAngle = this.value; renderScene(); });
@@ -412,6 +444,14 @@ function tick() {
 
 // update angles of everything if currently animated
 function updateAnimationAngles() {
+    if (g_yellowAnimation) {
+        g_yellowAngle = (45 * Math.sin(g_seconds));
+    }
+    if (g_magentaAnimation) {
+        g_magentaAngle = (45 * Math.sin(3*g_seconds));
+    }
+    g_lightPos[0] = Math.cos(g_seconds);
+
     if (g_baseNeckAnimation) {
         g_baseNeckAngle = 45*Math.sin(g_seconds);
         g_baseNeckAngle = Math.max(-45, Math.min(45, g_baseNeckAngle)); // from chatGPT - limiting movement of the neck
@@ -532,6 +572,17 @@ function renderScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     // gl.clear(gl.COLOR_BUFFER_BIT);
 
+
+    // pass the light position to GLSL
+    gl.uniform3f(u_lightPos, g_lightPos[0], g_lightPos[1], g_lightPos[2]);
+
+    // draw the light
+    var light = new Cube();
+    light.color = [2, 2, 0, 1];
+    light.matrix.translate(g_lightPos[0], g_lightPos[1], g_lightPos[2]);
+    light.matrix.scale(0.1, 0.1, 0.1);
+    light.matrix.translate(-0.5, -0.5, -0.5);
+    light.render();
 
     // test sphere
     var test = new Sphere();
