@@ -25,6 +25,7 @@ var FSHADER_SOURCE = `
     varying vec2 v_UV;
     varying vec3 v_Normal;
     uniform vec3 u_lightPos;
+    uniform vec3 u_cameraPos;
     uniform vec4 u_FragColor;
     uniform sampler2D u_Sampler0;
     uniform sampler2D u_Sampler1;
@@ -48,13 +49,40 @@ var FSHADER_SOURCE = `
             gl_FragColor = vec4(1, 0.2, 0.2, 1);                // Error, red
         }
 
-        vec3 lightVector = vec3(v_VertPos)-u_lightPos;
+        vec3 lightVector = u_lightPos-vec3(v_VertPos);
         float r = length(lightVector);
-        if (r < 1.0) {
-            gl_FragColor = vec4(1, 0, 0, 1);
-        } else if (r < 2.0) {
-            gl_FragColor = vec4(0, 1, 0, 1);
-        }
+
+        // red/green distance visualization
+        // if (r < 1.0) {
+        //     gl_FragColor = vec4(1, 0, 0, 1);
+        // } else if (r < 2.0) {
+        //     gl_FragColor = vec4(0, 1, 0, 1);
+        // }
+
+        // light falloff visualization 1/r^2
+        // gl_FragColor = vec4(vec3(gl_FragColor) / (r*r), 1);
+
+        // N dot
+        vec3 L = normalize(lightVector);
+        vec3 N = normalize(v_Normal);
+        float nDotL = max(dot(N, L), 0.0);
+
+        // Reflection
+        vec3 R = reflect(-L, N);
+
+        // eye
+        vec3 E = normalize(u_cameraPos-vec3(v_VertPos));
+
+        // specular
+        float specular = pow(max(dot(E, R), 0.0), 10.0);
+
+        vec3 diffuse = vec3(gl_FragColor) * nDotL * 0.7;
+        vec3 ambient = vec3(gl_FragColor) * 0.3;
+        gl_FragColor = vec4(specular+diffuse+ambient, 1.0);
+
+
+        // gl_FragColor = gl_FragColor * nDotL;
+        // gl_FragColor.a = 1.0;
     }`
 
 
@@ -173,6 +201,12 @@ function connectVariablesToGLSL() {
 
     u_lightPos = gl.getUniformLocation(gl.program, 'u_lightPos');
     if(!u_lightPos) {
+      console.log('Failed to get the storage location of u_lightPos');
+      return false;
+    }
+
+    u_cameraPos = gl.getUniformLocation(gl.program, 'u_cameraPos');
+    if(!u_cameraPos) {
       console.log('Failed to get the storage location of u_lightPos');
       return false;
     }
@@ -576,11 +610,14 @@ function renderScene() {
     // pass the light position to GLSL
     gl.uniform3f(u_lightPos, g_lightPos[0], g_lightPos[1], g_lightPos[2]);
 
+    // pass the camera position to GLSL
+    gl.uniform3f(u_cameraPos, g_camera.eye.x, g_camera.eye.y, g_camera.eye.z);
+
     // draw the light
     var light = new Cube();
     light.color = [2, 2, 0, 1];
     light.matrix.translate(g_lightPos[0], g_lightPos[1], g_lightPos[2]);
-    light.matrix.scale(0.1, 0.1, 0.1);
+    light.matrix.scale(-0.1, -0.1, -0.1);
     light.matrix.translate(-0.5, -0.5, -0.5);
     light.render();
 
@@ -590,6 +627,7 @@ function renderScene() {
     test.matrix.translate(0, .5, -0.75);
     test.matrix.scale(0.45, 0.45, 0.45);
     test.render();
+
     // draw FLOOR
     var floor = new Cube();
     floor.color = [1.0,0.0,0.0,1.0];
@@ -612,7 +650,7 @@ function renderScene() {
     sky.matrix.scale(-32, -32, -32);
     sky.render();
     
-    /*
+    
     // draw body
     var body = new Cube();
     body.color = [0.8196, 0.4980, 0.1725, 1.0];
@@ -621,7 +659,7 @@ function renderScene() {
     body.matrix.scale(0.6, 0.45, 0.45);
     body.render();
     
-    
+    /*
     // draw left wing
     var leftWing = new Cube();
     leftWing.color = [0.7076, 0.4482, 0.1553, 1];
