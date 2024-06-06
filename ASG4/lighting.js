@@ -83,14 +83,15 @@ var FSHADER_SOURCE = `
         vec3 diffuse = vec3(1.0, 1.0, 0.9) * vec3(gl_FragColor) * nDotL * 0.7;
         vec3 ambient = vec3(gl_FragColor) * 0.2;
 
-        // FIXME:
-        vec3 spotLightdirection = vec3(0,-1,0);
-        vec3 spotLight = normalize(u_spotlightPos - vec3(v_VertPos));
-        vec3 lightToPointDirection = -spotLight;
-        vec3 spotLightdiffuse = max(0.0, dot(spotLight, normalize(v_Normal))) * vec3(gl_FragColor) * vec3(1.0, 0.0, 1.0);
-        float angleToSurface = dot(lightToPointDirection, spotLightdirection);
+        vec3 spotlightDir = vec3(1,0,0);
+        vec3 spotlight = normalize(u_spotlightPos - vec3(v_VertPos));
+        vec3 lightDir = -spotlight;
+
+        vec3 spotlightdiffuse = max(0.0, dot(spotlight, normalize(v_Normal))) * vec3(gl_FragColor) * vec3(1.0, 0.0, 1.0);
+        float angleToSurface = dot(lightDir, spotlightDir);
+
         float cos = smoothstep(0.0, 20.0, angleToSurface);
-        diffuse += spotLightdiffuse;
+        diffuse += spotlightdiffuse;
 
         if (u_lightOn) {
             if (u_whichTexture == 0) {
@@ -325,7 +326,6 @@ let g_magentaAnimation = false;
 let g_lightPos = [0, 1, -2];
 let g_lightOn = true;
 
-// FIXME:
 let g_spotlightPos = [.1, .2, .03];
 
 function addActionsForHtmlUI() {
