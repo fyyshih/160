@@ -83,6 +83,7 @@
 
             const scene = new THREE.Scene();
             scene.background = new THREE.Color("black");
+            scene.fog = new THREE.Fog( 0xcccccc, 2, 50 );
 
             // ----------- draw cube -----------
             // creating a BoxGeometry (contains data for a box)
@@ -373,7 +374,7 @@
             scene.add(cylinder9);
             cylinder9.position.set(-0.05, 9.1, -0.2);
         }
-            
+
         function renderLights() {
             // (1) directional light - yellow
             let dir_color = 0xFFF703;
@@ -384,14 +385,7 @@
             scene.add(dir_light); 
             scene.add(dir_light.target);
 
-            // (2) create ambient light
-            const amb_color = 0xFFFFFF;
-            const amb_intensity = 2;
-            const amb_light = new THREE.AmbientLight(amb_color, amb_intensity);
-            amb_light.position.set(0, 6, 5);
-            scene.add(amb_light);
-
-            // (3) directional light - blue
+            // (2) directional light - blue
             let dir2_color = 0x0703FF;
             let dir2_intensity = 50;
             let dir2_light = new THREE.DirectionalLight(dir2_color, dir2_intensity);
@@ -399,15 +393,70 @@
             dir2_light.target.position.set(0, 0, 0);
             scene.add(dir2_light); 
             scene.add(dir2_light.target);
+
+            // (3) directional light - red
+            let dir_color0 = 0xc7201a;
+            let dir_intensity0 = 50;
+            let dir_light0 = new THREE.DirectionalLight(dir_color0, dir_intensity0);
+            dir_light0.position.set(3, -5, -11);
+            dir_light0.target.position.set(0, 0, 0);
+            scene.add(dir_light0); 
+            scene.add(dir_light0.target);
+
+            // (4) directional light - green
+            let dir_color1 = 0x14e314;
+            let dir_intensity1 = 50;
+            let dir_light1 = new THREE.DirectionalLight(dir_color1, dir_intensity1);
+            dir_light1.position.set(-3, -5, -11);
+            dir_light1.target.position.set(0, 0, 0);
+            scene.add(dir_light1); 
+            scene.add(dir_light1.target);
+
+            // // (5) directional light - purple
+            // let dir_color2 = 0x6a0ff2;
+            // let dir_intensity2 = 10;
+            // let dir_light2 = new THREE.DirectionalLight(dir_color2, dir_intensity2);
+            // dir_light2.position.set(-3, -5, 11);
+            // dir_light2.target.position.set(0, 0, 0);
+            // scene.add(dir_light2); 
+            // scene.add(dir_light2.target);
+
+        //     // (6) directional light - orange
+        //     let dir_color3 = 0x6a0ff2;
+        //     let dir_intensity3 = 50;
+        //     let dir_light3 = new THREE.DirectionalLight(dir_color3, dir_intensity3);
+        //     dir_light3.position.set(-3, -5, 11);
+        //     dir_light3.target.position.set(0, 0, 0);
+        //     scene.add(dir_light3); 
+        //     scene.add(dir_light3.target);
+        // }
         }
 
+        function anotherEgg(x, y, z) {
+            // egg white
+            const geometryW = new THREE.CylinderGeometry(1, 1, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const materialW = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
+            const cylinderW = new THREE.Mesh(geometryW, materialW);
+
+            scene.add(cylinderW);
+            cylinderW.position.set(xW, yW, zW);
+
+            // egg yolk
+            const geometryY = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 10, 1, false, 0, 2*Math.PI);
+            const materialY = new THREE.MeshPhongMaterial( { color: 0xFFD903 } );
+            const cylinder1Y = new THREE.Mesh(geometryY, materialY);
+            
+            scene.add(cylinderY);
+            cylinderY.position.set(x, y+0.2, z+0.25); // y += .2, z += .25
+            cylinderY.scale.set(0.5, 0.5, 0.5);
+        }
+ 
         // drawCube();
         drawEggWhites();
         drawEggYolks();
         drawCylinder();
         drawOctahedron();  
         renderLights();
-
         {
             const objLoader = new OBJLoader(); // 
             objLoader.load('./Breakfast/model.obj', (root) => {
@@ -419,25 +468,12 @@
 
     main();
 </script> 
-<h1>Notes to the Grader:</h1>
-<p>Hello! My three shapes are a cylinder, cube, and octahedron. If you can't see them,
-    you may have to zoom out of the scene a little.
-</p>
-<p>Obj: the breakfast table (Breakfast by Jarlan Perez [CC-BY] via Poly Pizza)</p>
-<p>Lighting: two directional lights (yellow and blue) coming from opposite directions.
-        These two lights are very light and are mostly easily observed in the rotating shapes.
-        One ambient light in the color white, to make everything seem lighter.
-</p>
-<p>Skybox: egg on toast</p>
-<p>Controls: top right of screen. You can also zoom in/out using your trackpad and drag the 
-    screen with your mouse/fingers to explore the scene. 
-</p>
-<p>At least 20 primary shapes: there are 9 eggs total, with each egg having 2 shapes
-    (1 for the egg white, 1 for the egg yolk). I also kept my shapes from 5A in so that 
-    it would be easier to observe the effects of the different colored lighting.
-</p>
+<h1>Notes to the Grader: Oversaturated Breakfast</h1>
 
+<p>
+    Hello! This is my attempt at replicating what oversaturated photos look like if they were 3D modeled. You may have to move the camera around a bit 
+    to be able to see everything in the scene (the bottom of the table usually blocks everything when you first load the page).
+</p>
 </body>
-
 </html>
 
