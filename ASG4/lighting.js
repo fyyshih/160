@@ -35,6 +35,7 @@ var FSHADER_SOURCE = `
     uniform sampler2D u_Sampler2;
     uniform int u_whichTexture;
     varying vec4 v_VertPos;
+    uniform vec3 u_spotlightPos;
     void main() {
         if (u_whichTexture == -3) {
             gl_FragColor = vec4((v_Normal+1.0)/2.0, 1.0);                         // Use color
@@ -63,7 +64,7 @@ var FSHADER_SOURCE = `
         // }
 
         // light falloff visualization 1/r^2
-        // gl_FragColor = vec4(vec3(gl_FragColor) / (r*r), 1);
+        gl_FragColor = vec4(vec3(gl_FragColor) / (r*r), 1);
 
         // N dot
         vec3 L = normalize(lightVector);
@@ -81,6 +82,15 @@ var FSHADER_SOURCE = `
 
         vec3 diffuse = vec3(1.0, 1.0, 0.9) * vec3(gl_FragColor) * nDotL * 0.7;
         vec3 ambient = vec3(gl_FragColor) * 0.2;
+
+        // FIXME:
+        vec3 spotLightdirection = vec3(0,-1,0);
+        vec3 spotLight = normalize(u_spotlightPos - vec3(v_VertPos));
+        vec3 lightToPointDirection = -spotLight;
+        vec3 spotLightdiffuse = max(0.0, dot(spotLight, normalize(v_Normal))) * vec3(gl_FragColor) * vec3(1.0, 0.0, 1.0);
+        float angleToSurface = dot(lightToPointDirection, spotLightdirection);
+        float cos = smoothstep(0.0, 20.0, angleToSurface);
+        diffuse += spotLightdiffuse;
 
         if (u_lightOn) {
             if (u_whichTexture == 0) {
@@ -114,6 +124,7 @@ let u_lightPos;
 let u_lightOn;
 let u_cameraPos;
 let u_NormalMatrix;
+let u_spotlightPos;
 // let u_Sampler2;
 // camera = new Camera();
 
@@ -236,6 +247,12 @@ function connectVariablesToGLSL() {
       return false;
     }
 
+    u_spotlightPos = gl.getUniformLocation(gl.program, 'u_spotlightPos');
+    if(!u_spotlightPos) {
+      console.log('Failed to get the storage location of u_spotlightPos');
+      return false;
+    }
+
     // set initial vlue of matrix to identity matrix
     var identityM = new Matrix4();
     gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
@@ -307,6 +324,9 @@ let g_magentaAngle = 0;
 let g_magentaAnimation = false;
 let g_lightPos = [0, 1, -2];
 let g_lightOn = true;
+
+// FIXME:
+let g_spotlightPos = [.1, .2, .03];
 
 function addActionsForHtmlUI() {
     // button events: animation on/off (both neck joints + head)
@@ -643,6 +663,16 @@ function renderScene() {
     // pass the light status
     gl.uniform1i(u_lightOn, g_lightOn);
 
+    gl.uniform3f(u_spotlightPos, g_spotlightPos[0], g_spotlightPos[1], g_spotlightPos[2]);
+
+    // spotlight:
+    let spotlight = new Cube();
+    spotlight.color = [10, 10, 1];
+    spotlight.matrix.translate(g_spotlightPos[0], g_spotlightPos[1], g_spotlightPos[2]);
+    spotlight.matrix.scale(-.1, -.1, -.1);
+    spotlight.matrix.translate(-.1, .2, .03);
+    spotlight.render();
+
     // draw the light
     var light = new Cube();
     light.color = [2, 2, 0, 1];
@@ -659,31 +689,6 @@ function renderScene() {
     test.matrix.scale(0.45, 0.45, 0.45);
     // test.normalMatrix.setInverseOf(test.matrix).transpose();
     test.render();
-
-    // // draw FLOOR
-    // var floor = new Cube();
-    // floor.color = [1.0,0.0,0.0,1.0];
-    // floor.textureNum = 0;
-    // floor.matrix.translate(-5.0, -0.88, 5.0);
-    // floor.matrix.scale(32, 32, 32);
-    // floor.render();
-
-    // // draw SKY
-    // var sky = new Cube();
-    // sky.color = [1.0, 0.0, 0.0, 1.0];
-    // if (g_normalOn == true) {
-    //     sky.textureNum = -1;
-    //     console.log('normal on, ', sky.textureNum);
-    // } else {
-    //     sky.textureNum = 0;
-    //     console.log('normal OFF, ', sky.textureNum);
-    // }
-    // // make it gray for now
-    // sky.textureNum = 0;
-    // sky.matrix.translate(-5.0, -0.88, 5.0); // (1, -0.5, 2);
-    // sky.matrix.scale(-32, -32, -32);
-    // sky.render();
-    
     
     // draw body
     var body = new Cube();
@@ -694,7 +699,6 @@ function renderScene() {
     // body.normalMatrix.setInverseOf(body.matrix).transpose();
     body.render();
     
-    /*
     // draw left wing
     var leftWing = new Cube();
     leftWing.color = [0.7076, 0.4482, 0.1553, 1];
@@ -800,7 +804,6 @@ function renderScene() {
     lowerBeak.matrix.translate(0, -1.9, 0);
     lowerBeak.matrix.rotate(0, 0, 0, 1);
     lowerBeak.render();
-    */
 
     if (g_wallAnimation) {
         drawMap();
