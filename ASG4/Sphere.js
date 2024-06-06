@@ -3,6 +3,7 @@ class Sphere {
         this.type = 'sphere';
         this.color = [1.0, 1.0, 1.0, 1.0];
         this.matrix = new Matrix4();
+        this.normalMatrix = new Matrix4();
         this.textureNum = -2;
         this.verts32 = new Float32Array([]);
     }

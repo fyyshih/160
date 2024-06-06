@@ -8,6 +8,7 @@ var VSHADER_SOURCE = `
     varying vec2 v_UV;
     varying vec3 v_Normal;
     varying vec4 v_VertPos;
+    uniform mat4 u_NormalMatrix;
     uniform mat4 u_ModelMatrix;
     uniform mat4 u_GlobalRotateMatrix;
     uniform mat4 u_ViewMatrix;
@@ -16,6 +17,7 @@ var VSHADER_SOURCE = `
         gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
         v_UV = a_UV;
         v_Normal = a_Normal;
+        // v_Normal = normalize(vec3(u_NormalMatrix * vec4(a_Normal, 1)));
         v_VertPos = u_ModelMatrix * a_Position;
     }`
 
@@ -27,6 +29,7 @@ var FSHADER_SOURCE = `
     uniform vec3 u_lightPos;
     uniform vec3 u_cameraPos;
     uniform vec4 u_FragColor;
+    uniform bool u_lightOn;
     uniform sampler2D u_Sampler0;
     uniform sampler2D u_Sampler1;
     uniform sampler2D u_Sampler2;
@@ -74,11 +77,18 @@ var FSHADER_SOURCE = `
         vec3 E = normalize(u_cameraPos-vec3(v_VertPos));
 
         // specular
-        float specular = pow(max(dot(E, R), 0.0), 10.0);
+        float specular = pow(max(dot(E, R), 0.0), 64.0) * 0.8;
 
-        vec3 diffuse = vec3(gl_FragColor) * nDotL * 0.7;
-        vec3 ambient = vec3(gl_FragColor) * 0.3;
-        gl_FragColor = vec4(specular+diffuse+ambient, 1.0);
+        vec3 diffuse = vec3(1.0, 1.0, 0.9) * vec3(gl_FragColor) * nDotL * 0.7;
+        vec3 ambient = vec3(gl_FragColor) * 0.2;
+
+        if (u_lightOn) {
+            if (u_whichTexture == 0) {
+                gl_FragColor = vec4(specular+diffuse+ambient, 1.0);
+            } else {
+                gl_FragColor = vec4(diffuse+ambient, 1.0);
+            }
+        }
 
 
         // gl_FragColor = gl_FragColor * nDotL;
@@ -101,6 +111,9 @@ let u_whichTexture;
 let u_Sampler0;
 let u_Sampler1;
 let u_lightPos;
+let u_lightOn;
+let u_cameraPos;
+let u_NormalMatrix;
 // let u_Sampler2;
 // camera = new Camera();
 
@@ -207,7 +220,19 @@ function connectVariablesToGLSL() {
 
     u_cameraPos = gl.getUniformLocation(gl.program, 'u_cameraPos');
     if(!u_cameraPos) {
-      console.log('Failed to get the storage location of u_lightPos');
+      console.log('Failed to get the storage location of u_cameraPos');
+      return false;
+    }
+
+    u_lightOn = gl.getUniformLocation(gl.program, 'u_lightOn');
+    if(!u_lightOn) {
+      console.log('Failed to get the storage location of u_lightOn');
+      return false;
+    }
+
+    u_NormalMatrix = gl.getUniformLocation(gl.program, 'u_NormalMatrix');
+    if(!u_NormalMatrix) {
+      console.log('Failed to get the storage location of u_NormalMatrix');
       return false;
     }
 
@@ -281,6 +306,7 @@ let g_yellowAnimation = false;
 let g_magentaAngle = 0;
 let g_magentaAnimation = false;
 let g_lightPos = [0, 1, -2];
+let g_lightOn = true;
 
 function addActionsForHtmlUI() {
     // button events: animation on/off (both neck joints + head)
@@ -294,14 +320,15 @@ function addActionsForHtmlUI() {
     document.getElementById('animationUpperNeckOffButton').onclick = function() {g_upperNeckAnimation = false;};
     document.getElementById('animationHeadOnButton').onclick = function() {g_headAnimation = true;};
     document.getElementById('animationHeadOffButton').onclick = function() {g_headAnimation = false;};
-
+    document.getElementById('lightOnButton').onclick = function() {g_lightOn = true;};
+    document.getElementById('lightOffButton').onclick = function() {g_lightOn = false;};
 
     // color slider events:
     document.getElementById('yellowSlide').addEventListener('mousemove', function(ev) {if(ev.buttons == 1) {g_yellowAngle = this.value; renderScene();}});
     document.getElementById('magentaSlide').addEventListener('mousemove', function(ev) {if(ev.buttons == 1) {g_magentaAngle = this.value; renderScene();}});
-    document.getElementById('lightSlideX').addEventListener('mousemove', function(ev) {if(ev.buttons == 1) {g_lightPos[0] = this.value/100; renderScene();}});
-    document.getElementById('lightSlideY').addEventListener('mousemove', function(ev) {if(ev.buttons == 1) {g_lightPos[1] = this.value/100; renderScene();}});
-    document.getElementById('lightSlideZ').addEventListener('mousemove', function(ev) {if(ev.buttons == 1) {g_lightPos[2] = this.value/100; renderScene();}});
+    document.getElementById('lightSlideX').addEventListener('input', function(ev) {g_lightPos[0] = this.value/100; renderScene();});
+    document.getElementById('lightSlideY').addEventListener('input', function(ev) {g_lightPos[1] = this.value/100; renderScene();});
+    document.getElementById('lightSlideZ').addEventListener('input', function(ev) {g_lightPos[2] = this.value/100; renderScene();});
     // slider events: head + neck angle (both joints). "input" instead of "mousemove".
     document.getElementById('baseNeckSlide').addEventListener('input', function() { g_baseNeckAngle = this.value; renderScene(); });
     document.getElementById('upperNeckSlide').addEventListener('input', function() { g_upperNeckAngle = this.value; renderScene(); });
@@ -611,7 +638,10 @@ function renderScene() {
     gl.uniform3f(u_lightPos, g_lightPos[0], g_lightPos[1], g_lightPos[2]);
 
     // pass the camera position to GLSL
-    gl.uniform3f(u_cameraPos, g_camera.eye.x, g_camera.eye.y, g_camera.eye.z);
+    gl.uniform3f(u_cameraPos, camera.eye.x, camera.eye.y, camera.eye.z);
+
+    // pass the light status
+    gl.uniform1i(u_lightOn, g_lightOn);
 
     // draw the light
     var light = new Cube();
@@ -619,6 +649,7 @@ function renderScene() {
     light.matrix.translate(g_lightPos[0], g_lightPos[1], g_lightPos[2]);
     light.matrix.scale(-0.1, -0.1, -0.1);
     light.matrix.translate(-0.5, -0.5, -0.5);
+    // light.normalMatrix.setInverseOf(light.matrix).transpose();
     light.render();
 
     // test sphere
@@ -626,29 +657,32 @@ function renderScene() {
     test.color = [0.75, 0.5, 0.5];
     test.matrix.translate(0, .5, -0.75);
     test.matrix.scale(0.45, 0.45, 0.45);
+    // test.normalMatrix.setInverseOf(test.matrix).transpose();
     test.render();
 
-    // draw FLOOR
-    var floor = new Cube();
-    floor.color = [1.0,0.0,0.0,1.0];
-    floor.textureNum = 0;
-    floor.matrix.translate(-5.0, -0.88, 5.0);
-    floor.matrix.scale(32, 32, 32);
-    floor.render();
+    // // draw FLOOR
+    // var floor = new Cube();
+    // floor.color = [1.0,0.0,0.0,1.0];
+    // floor.textureNum = 0;
+    // floor.matrix.translate(-5.0, -0.88, 5.0);
+    // floor.matrix.scale(32, 32, 32);
+    // floor.render();
 
-    // draw SKY
-    var sky = new Cube();
-    sky.color = [1.0, 0.0, 0.0, 1.0];
-    if (g_normalOn == true) {
-        sky.textureNum = -1;
-        console.log('normal on, ', sky.textureNum);
-    } else {
-        sky.textureNum = 0;
-        console.log('normal OFF, ', sky.textureNum);
-    }
-    sky.matrix.translate(-5.0, -0.88, 5.0); // (1, -0.5, 2);
-    sky.matrix.scale(-32, -32, -32);
-    sky.render();
+    // // draw SKY
+    // var sky = new Cube();
+    // sky.color = [1.0, 0.0, 0.0, 1.0];
+    // if (g_normalOn == true) {
+    //     sky.textureNum = -1;
+    //     console.log('normal on, ', sky.textureNum);
+    // } else {
+    //     sky.textureNum = 0;
+    //     console.log('normal OFF, ', sky.textureNum);
+    // }
+    // // make it gray for now
+    // sky.textureNum = 0;
+    // sky.matrix.translate(-5.0, -0.88, 5.0); // (1, -0.5, 2);
+    // sky.matrix.scale(-32, -32, -32);
+    // sky.render();
     
     
     // draw body
@@ -657,6 +691,7 @@ function renderScene() {
     body.textureNum = 0;
     body.matrix.translate(0, -.5, 0.0);
     body.matrix.scale(0.6, 0.45, 0.45);
+    // body.normalMatrix.setInverseOf(body.matrix).transpose();
     body.render();
     
     /*
